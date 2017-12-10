@@ -63,7 +63,7 @@ file_found:
 
         mov     ax, [es: di + 1Ah]  ; Найти первый кластер
         mov     [7C22h], word 800h
-next:   push    ax                  ; Прочесть очередной кластер
+next:   push    ax                  ; Прочесть очередной кластер (1 сектор)
         add     ax, 31              ; 33 - 2
         les     bx, [7C20h]         ; Заполнять c 0800h : 0000h
         call    ReadSector
@@ -78,13 +78,12 @@ next:   push    ax                  ; Прочесть очередной кла
         les     bx, [7C27h]         ; ES:BX = 07E0h : 0000h
         call    ReadSector
         pop     ax
+        mov     bp, ax
         mov     di, ax              ; Отыскать указатель на следующий кластер
         shr     di, 1
-        test    al, 1
-        mov     ax, [es: di]
-        jz      @f
-        shr     ax, 4               ; Выровнять из старшего байта
-@@:     cmp     di, 0x1FF           ; Случай, когда требуется 4 бита из следующего сектора
+        and     di, 0x1FF
+        mov     ax, [es: di]        
+        cmp     di, 0x1FF           ; Случай, когда требуется 4/8 бит из следующего сектора
         jne     @f
         push    ax
         xchg    ax, si
@@ -92,6 +91,9 @@ next:   push    ax                  ; Прочесть очередной кла
         call    ReadSector
         pop     ax
         mov     ah, [es: bx]
+@@:     test    bp, 1               ; Сдвинуто на 4 бита?
+        jz      @f
+        shr     ax, 4               ; Выровнять из старшего байта >> 4
 @@:     and     ax, 0x0FFF          ; Срезать лишние биты
         cmp     ax, 0x0FF0
         jb      next
