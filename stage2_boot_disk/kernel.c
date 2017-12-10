@@ -1,17 +1,18 @@
-#define brk __asm__ __volatile__("xchg %bx, %bx");
+#include "decl/kernel.h"
+#include "kernel/io_redirect.c"
+#include "kernel/io_display_util.c"
+#include "app/start_interface.c"
 
 // ---------------------------------------------------------------------
 
 void main() {
     
-    brk;
-    
     int i;
-    char* videomemory = (char*)0xB8000;
+
+    kernel_io_redirect(0);
+
+    app_start_interface();
     
-    for (i = 0; i < 4000; i += 2) {
-        videomemory[i] = 0x41;
-    }
     
-    for(;;);    
+    for(;;);
 }
