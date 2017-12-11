@@ -10,7 +10,6 @@
 #define IRQ_CASCADE      (1 << 2)
 #define IRQ_PS2MOUSE     (1 << 12)
 
-
 // Некоторые константы
 // ---------------------------------------------------------------------
 
@@ -98,3 +97,7 @@ static inline uint32_t IoRead32(int16_t port) {
     __asm__ volatile("inl %1, %0" : "=a" (data) : "Nd" (port));        
     return data;
 }
+
+// Клавиатура
+// ---------------------------------------------------------------------
+int keyb_buffer_position;

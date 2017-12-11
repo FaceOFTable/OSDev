@@ -6,8 +6,6 @@
 [GLOBAL apic_disable]
 [GLOBAL interrupt_null]
 [GLOBAL interrupt_keyb]
-[GLOBAL out8]
-[GLOBAL in8]
 
 ; ----------------------------------------------------------------------
 _start:
@@ -24,39 +22,7 @@ apic_disable:
         and eax, 0xfffff7ff
         wrmsr
         ret
-        
-; ----------------------------------------------------------------------
-; Запрос идет, используя стек вызова
-
-out8:   
-
-        push    ebp
-        mov     ebp, esp
-        push    edx 
-        push    eax        
-        mov     dx, [ebp + 8]
-        mov     al, [ebp + 12]
-        out     dx, al        
-        pop     eax
-        pop     edx
-        pop     ebp
-        ret
-        
-; ----------------------------------------------------------------------
-; Результат в EAX
-
-in8:    
-
-        push    ebp
-        mov     ebp, esp 
-        push    eax        
-        mov     dx, [ebp + 8]
-        in      al, dx 
-        and     eax, 0xFF 
-        pop     eax
-        pop     ebp
-        ret
-
+     
 ; ----------------------------------------------------------------------
 ; ПРЕРЫВАНИЯ
 
