@@ -13,7 +13,7 @@ void ui_start() {
     
     int i;
     
-    display_cursor_at(16,5);
+    display_cursor_at(0,0);
     display_cursor_mode(0,15);
     
     display_bgblock(0, 0, 2000, 0x70); // Очистить экран (цвет)
