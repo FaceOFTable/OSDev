@@ -59,6 +59,7 @@ void display_cursor_at(int x, int y)
  
 	IoWrite8(0x3D4, 0x0F);
 	IoWrite8(0x3D5, (uint8_t) (pos & 0xFF));
+    
 	IoWrite8(0x3D4, 0x0E);
 	IoWrite8(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }

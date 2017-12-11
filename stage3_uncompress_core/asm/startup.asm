@@ -1,8 +1,11 @@
 [BITS 32]
 
 [EXTERN main]
+[EXTERN kernel_pic_keyb]
 [GLOBAL _start]
 [GLOBAL apic_disable]
+[GLOBAL interrupt_null]
+[GLOBAL interrupt_keyb]
 [GLOBAL out8]
 [GLOBAL in8]
 
@@ -53,3 +56,21 @@ in8:
         pop     eax
         pop     ebp
         ret
+
+; ----------------------------------------------------------------------
+; ПРЕРЫВАНИЯ
+
+interrupt_null:
+
+        xchg    bx, bx
+        iretd
+
+; Обработчик клавиатуры
+interrupt_keyb:
+
+        pushad        
+        call    kernel_pic_keyb        
+        mov     al, 20h
+        out     20h, al
+        popad
+        iretd

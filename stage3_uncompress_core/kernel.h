@@ -1,4 +1,15 @@
-#define brk __asm__ __volatile__("xchg %bx, %bx");
+
+// Процедура необходимой задержки для корректной работы прерываний
+#define IoWait asm volatile("jecxz 1f" "\n\t" "1:jecxz 2f" "\n\t" "2:");
+#define brk asm volatile("xchg %bx, %bx");
+#define cli asm volatile("cli");
+#define sti asm volatile("sti");
+
+#define IRQ_TIMER        (1 << 0)
+#define IRQ_KEYB         (1 << 1)
+#define IRQ_CASCADE      (1 << 2)
+#define IRQ_PS2MOUSE     (1 << 12)
+
 
 // Некоторые константы
 // ---------------------------------------------------------------------
@@ -49,9 +60,6 @@
 
 // Отключить LAPIC
 void apic_disable();
-
-// Процедура необходимой задержки для корректной работы прерываний
-#define IoWait asm volatile("jecxz 1f" "\n\t" "1:jecxz 2f" "\n\t" "2:");
 
 // Писать в (port) данные data
 // ---------------------------------------------------------------------
