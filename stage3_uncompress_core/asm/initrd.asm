@@ -76,8 +76,7 @@ GoNext: call    ReadCluster
         jcxz    .found
         add     di, 20h
         dec     bp
-        jne     @b      
-        
+        jne     @b        
         call    NextCluster
         cmp     eax, 0x0FFFFFF0
         jb      GoNext
@@ -87,16 +86,48 @@ GoNext: call    ReadCluster
 ; Файл был найден
 
 .found:  
-brk
+
         mov     ax, [es: di + 14h]          ; Первый кластер
         shl     eax, 16
         mov     ax, [es: di + 1Ah]        
-@@:     call    ReadCluster             ; Начать цикл скачивания программы в память
+@@:     call    ReadCluster                 ; Начать цикл скачивания программы в память
+        push    eax
 
-        ; --- переместить блок в XMS
+        ; Вход в PM для переноса кластера
+        mov     edi, [start_xms]
+
+        and     ecx, 0FFFFh
+        shl     ecx, 9
+        push    ecx
+        
+        mov     eax, cr0
+        or      al, 1
+        mov     cr0, eax
+        jmp     28h : locpm 
+locpm:  mov     ax, 8
+        mov     ds, ax
+        shr     ecx, 2
+        mov     esi, 100000h
+.loop:  mov     eax, [esi]
+        mov     [edi], eax
+        add     esi, 4
+        add     edi, 4
+        dec     ecx
+        jne     .loop
+        
+        ; Выход из PM обратно
+        mov     eax, cr0
+        and     al, 0xFE
+        mov     cr0, eax
+        jmp     0 : locrm
+        
+        ; Восстановление сегментов + перемещение указателя
+locrm:  pop     ecx
+        add     [start_xms], ecx
+        xor     ax, ax
+        mov     ds, ax
         
         ; Логирование загрузки
-        push    eax
         mov     ah, 0Eh
         mov     al, '.'
         int     10h
@@ -106,7 +137,6 @@ brk
         call    NextCluster            
         cmp     eax, 0x0FFFFFF0
         jb      @b
-
         ret
 
 ; ----------------------------------------------------------------------
