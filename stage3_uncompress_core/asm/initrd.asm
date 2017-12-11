@@ -19,7 +19,7 @@ initrd:
         ; Читать первый сектор для поиска FAT32
         mov     eax, 0
         call    ReadSector
-        
+
         ; Поиск в разделах FAT32
         mov     cx, 4
         mov     si, 7DBEh               
@@ -34,7 +34,7 @@ initrd:
 .found32:
 
         ; ES:DI указывает на HMA
-        mov     ax, 0xFFFF
+        mov     ax, 0x9000
         mov     es, ax
 
         ; Прочитать первый сектор FAT
@@ -60,12 +60,12 @@ initrd:
         
         ; Получить стартовый кластер на прочтение каталогов        
         mov     eax, [7E00h + BPB_RootEnt_32]
-        
+
         ; Чтение очередного кластера RootDir в память
 GoNext: call    ReadCluster                             
         shl     cx, 4
         mov     bp, cx
-        mov     di, 10h
+        mov     di, 0
         
         ; Поиск необходимого файла в кластере
 @@:     mov     si, FILEID
@@ -80,7 +80,11 @@ GoNext: call    ReadCluster
         call    NextCluster
         cmp     eax, 0x0FFFFFF0
         jb      GoNext
-        int     18h
+        
+        ; Выдать ошибку поиска файла
+        mov     ax, 0E22h
+        int     10h
+        jmp     $
 
 ; ----------------------------------------------------------------------
 ; Файл был найден
@@ -96,7 +100,6 @@ GoNext: call    ReadCluster
         shl     eax, 16
         mov     ax, [es: di + 1Ah]        
         
-        
 .rd:    call    ReadCluster                 ; Начать цикл скачивания программы в память
         push    eax
 
@@ -105,15 +108,15 @@ GoNext: call    ReadCluster
         and     ecx, 0FFFFh
         shl     ecx, 9
         push    ecx
-        
+
         mov     eax, cr0
         or      al, 1
         mov     cr0, eax
         jmp     28h : .locpm
-.locpm: mov     ax, 8
+.locpm: mov     ax, 20h
         mov     ds, ax
         shr     ecx, 2
-        mov     esi, 100000h
+        mov     esi, 90000h
 .loop:  mov     eax, [esi]
         mov     [edi], eax
         add     esi, 4
@@ -128,10 +131,10 @@ GoNext: call    ReadCluster
         jmp     0 : .locrm
         
         ; Восстановление сегментов + перемещение указателя
-.locrm: pop     ecx
-        add     [start_xms], ecx
-        xor     ax, ax
+.locrm: xor     ax, ax
         mov     ds, ax
+        pop     ecx
+        add     [start_xms], ecx
         
         ; Логирование загрузки
         mov     ah, 0Eh
@@ -196,7 +199,9 @@ ReadCluster:
 ; ----------------------------------------------------------------------
 ErrorCaused:
 
-        int     18h
+        mov     ax, 0E23h
+        int     10h
+        jmp     $
 
 ; ----------------------------------------------------------------------
 FILEID  db 'INITRD  IMG'
@@ -209,8 +214,8 @@ SECTOR: dw 0010h  ; 0 | размер DAP = 16
         dq 0      ; 8 | номер сектора [0..n - 1]
 CLUSTR: dw 0010h  ; 0 | размер DAP = 16
         dw 0001h  ; 2 | 1 сектор
-        dw 0010h  ; 4 | смещение
-        dw 0FFFFh ; 6 | сегмент, указывает на HMA
+        dw 0000h  ; 4 | смещение
+        dw 9000h  ; 6 | сегмент, указывает на HMA
         dq 0      ; 8 | номер сектора [0..n - 1]
 
 ; ----------------------------------------------------------------------
