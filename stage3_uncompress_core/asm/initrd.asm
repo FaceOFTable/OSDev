@@ -87,15 +87,21 @@ GoNext: call    ReadCluster
 
 .found:  
 
-        mov     ax, [es: di + 14h]          ; Первый кластер
+        ; Размер файла
+        mov     eax, [es: di + 1Ch]
+        mov     [initrd_size], eax
+
+        ; Первый кластер
+        mov     ax, [es: di + 14h]
         shl     eax, 16
         mov     ax, [es: di + 1Ah]        
-@@:     call    ReadCluster                 ; Начать цикл скачивания программы в память
+        
+        
+.rd:    call    ReadCluster                 ; Начать цикл скачивания программы в память
         push    eax
 
         ; Вход в PM для переноса кластера
-        mov     edi, [start_xms]
-
+        mov     edi, [start_xms]    
         and     ecx, 0FFFFh
         shl     ecx, 9
         push    ecx
@@ -103,8 +109,8 @@ GoNext: call    ReadCluster
         mov     eax, cr0
         or      al, 1
         mov     cr0, eax
-        jmp     28h : locpm 
-locpm:  mov     ax, 8
+        jmp     28h : .locpm
+.locpm: mov     ax, 8
         mov     ds, ax
         shr     ecx, 2
         mov     esi, 100000h
@@ -119,10 +125,10 @@ locpm:  mov     ax, 8
         mov     eax, cr0
         and     al, 0xFE
         mov     cr0, eax
-        jmp     0 : locrm
+        jmp     0 : .locrm
         
         ; Восстановление сегментов + перемещение указателя
-locrm:  pop     ecx
+.locrm: pop     ecx
         add     [start_xms], ecx
         xor     ax, ax
         mov     ds, ax
@@ -136,7 +142,7 @@ locrm:  pop     ecx
         ; Найти следующий кластер
         call    NextCluster            
         cmp     eax, 0x0FFFFFF0
-        jb      @b
+        jb      .rd
         ret
 
 ; ----------------------------------------------------------------------
@@ -210,5 +216,6 @@ CLUSTR: dw 0010h  ; 0 | размер DAP = 16
 ; ----------------------------------------------------------------------
 start_fat   dd ?
 start_data  dd ?
-start_xms   dd 00400000h
+start_xms   dd 00200000h
+initrd_size dd 0
 
