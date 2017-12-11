@@ -1,6 +1,6 @@
 
 // Процедура, которая переводит IRQ с их стандартных позиции из R-Mode в P-Mode
-void kernel_io_redirect(int bitmask) {   
+void kernel_pic_redirect(int bitmask) {   
 
     apic_disable();    
 

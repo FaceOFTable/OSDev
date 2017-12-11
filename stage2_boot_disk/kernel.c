@@ -1,18 +1,19 @@
-#include "decl/kernel.h"
-#include "kernel/io_redirect.c"
-#include "kernel/io_display_util.c"
-#include "app/start_interface.c"
+#include "kernel.h"
+#include "kernel/pic_redirect.c"
+#include "display/util.c"
+#include "ui/start.c"
+#include "app/emulator.c"
 
 // ---------------------------------------------------------------------
 
 void main() {
     
-    int i;
+// brk;
 
-    kernel_io_redirect(0);
+    // app_emulator_init();
+    kernel_pic_redirect(0);
+    
+    ui_start();
 
-    app_start_interface();
-    
-    
     for(;;);
 }

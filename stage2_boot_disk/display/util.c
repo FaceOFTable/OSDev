@@ -3,7 +3,7 @@
  */
 
 // Рисование блока (фонового), начиная с [x,y] позиции
-void io_display_bgblock(int x, int y, int length, char bgcolor) {
+void display_bgblock(int x, int y, int length, char bgcolor) {
         
     int i;
     char* addr = DISPLAY_TEXT_ADDR + (x + y*80) * 2;
@@ -14,7 +14,7 @@ void io_display_bgblock(int x, int y, int length, char bgcolor) {
 }
 
 // Рисование фрейма
-void io_display_frame(int x1, int y1, int x2, int y2) {
+void display_frame(int x1, int y1, int x2, int y2) {
     
     int i;
     char* addr = DISPLAY_TEXT_ADDR;
@@ -39,7 +39,7 @@ void io_display_frame(int x1, int y1, int x2, int y2) {
 }
 
 // Печать строки
-void io_display_text(int x1, int y1, char* string) {
+void display_text(int x1, int y1, char* string) {
     
     char* addr = DISPLAY_TEXT_ADDR + 2*(x1 + y1*80);
     
@@ -50,4 +50,25 @@ void io_display_text(int x1, int y1, char* string) {
         string++;
     }
     
+}
+
+// Положение курсора
+void display_cursor_at(int x, int y)
+{
+	uint16_t pos = y * 80 + x;
+ 
+	IoWrite8(0x3D4, 0x0F);
+	IoWrite8(0x3D5, (uint8_t) (pos & 0xFF));
+	IoWrite8(0x3D4, 0x0E);
+	IoWrite8(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}
+
+// Режим курсора
+void display_cursor_mode(uint8_t cursor_start, uint8_t cursor_end)
+{
+	IoWrite8(0x3D4, 0x0A);
+	IoWrite8(0x3D5, (IoRead8(0x3D5) & 0xC0) | cursor_start);
+ 
+	IoWrite8(0x3D4, 0x0B);
+	IoWrite8(0x3D5, (IoRead8(0x3E0) & 0xE0) | cursor_end);
 }
