@@ -127,22 +127,19 @@ LZW_read_bits_count:
         
         ; Обнаружено превышение байта, передвинуть указатель потока +8 бит
         ; до тех пор, пока CL не будет <= 8
+
         sub	    cl, 8
         inc	    ebx
         jmp	    LZW_read_bits_count
     
-        ; в ax имеем прочитанные биты (кол-во CH)
-
 LZW_read_bits_ok:
 
         mov	    [LZW_bits], cl
         cmp	    eax, 100h
-        jb	    LZW_single_byte             ; ax < 100h -- простой байт
-        je	    LZW_cmd                     ; ax = 100h -- команда очистки словаря
+        jb	    LZW_single_byte         ; ax < 100h -- простой байт
+        je	    LZW_cmd                 ; ax = 100h -- команда очистки словаря
 
-        ; Использовать указатель на построенный словарь
-
-        sub     eax, 101h
+        sub     eax, 101h               ; Использовать указатель на построенный словарь
         shl	    eax, 3
         cmp	    eax, edx
         ja	    LZW_error               ; eax - указатель на словарь если edx < eax, словарь превышен
@@ -194,6 +191,7 @@ LZW_cmd:
 LZW_error:
 
         brk
+        xchg    cx, cx
         jmp     $
 
 ; ----------------------------------------------------------------------            
