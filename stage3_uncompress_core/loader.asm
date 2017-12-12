@@ -240,6 +240,29 @@ LZW_end:
         mov     eax, cr4
         or      ax, 3 shl 9		; set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
         mov     cr4, eax    
+
+        ; Разметка страничной организации памяти
+        ; Заполнить PDBR только 1 каталогом на 4 Мб
+        mov     edi, 1004h
+        mov     [edi - 4], dword (1 + 2) + 2000h
+        xor     eax, eax
+        mov     ecx, 1023
+        rep     stosd
+        
+        ; Заполнить первый каталог
+        mov     ecx, 1024
+        mov     eax, 3
+@@:     stosd
+        add     eax, 1000h
+        cmp     edi, 3000h
+        jne     @b
+
+        ; Загрузка начального PDBR и включение режима страниц
+        mov     eax, 1000h
+        mov     cr3, eax
+        mov     eax, cr0
+        or      eax, 80000000h
+        mov     cr0, eax
         jmp     100000h
 
 os:     file    "kernel.c.bin"
