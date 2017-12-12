@@ -31,6 +31,10 @@
 #define int64_t     long long
 #define uint64_t    unsigned long long
 
+#define bool        unsigned char
+#define true        0xff
+#define false       0
+
 // Адреса PIC 8086/88
 // ---------------------------------------------------------------------
 
@@ -103,10 +107,3 @@ static inline uint32_t IoRead32(int16_t port) {
 
 // Позиция клавиатурного буфера
 unsigned int keyb_buffer_position;
-
-// Максимальный объем памяти
-uint32_t mm_top;
-
-// 4кб страница с указателями на память для системных нужд (4 мб)
-uint32_t data_alloc;
-
