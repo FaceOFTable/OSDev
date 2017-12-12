@@ -106,12 +106,13 @@ void display_vga_write_regs(unsigned char *regs) {
 
 // Писать пиксель
 void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
+    
     char* vaddr = (char*)0xA0000;
 
     uint16_t symbol = (x >> 3) + y*80;
     uint16_t mask = 0x8000 >> (x & 7);
 
-    // Установка маски (вертикальная)
+    // Установка маски, регистр 8 (вертикальная запись в слои)
 	IoWrite16(VGA_GC_INDEX, 0x08 | mask);
 
     // Читать перед записью, иначе не сработает
@@ -128,6 +129,10 @@ void display_vga_mode(int mode) {
 
             // -- todo палитру
             display_vga_write_regs( (unsigned char*)disp_vga_640x480x16 );
+            
+            // Режим 2 (регистр выбор режима 5) 
+            // -- режим записи 1 слой цвета - 1 бит
+            
             IoWrite16(VGA_GC_INDEX, 0x0205);
             break;
 
@@ -151,7 +156,7 @@ void display_vga_cls(int color) {
 
 
         case VGA_640x480:
-
+        
             IoWrite16(VGA_GC_INDEX, 0xFF08);
             for (i = 0; i < 80*480; i++) {
                 volatile uint8_t t = vaddr[ i ];
