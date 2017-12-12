@@ -5,7 +5,7 @@ if (nasm -felf32 -o startup.o asm/startup.asm)
 then
 
 # Компиляция ядра
-if (clang -Os -ffreestanding -m32 -msse -msse2 -c -o kernel.o kernel.c)
+if (clang -Os -ffreestanding -m32 -mno-sse -c -o kernel.o kernel.c)
 then
 
 # Выгрузка бинарного файла
