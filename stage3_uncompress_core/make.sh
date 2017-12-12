@@ -9,7 +9,7 @@ if (clang -Os -ffreestanding -m32 -mno-sse -c -o kernel.o kernel.c)
 then
 
 # Выгрузка бинарного файла
-if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x100000 -Tdata=0x280000 startup.o kernel.o -o kernel.c.bin)
+if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x100000 -Tdata=0x180000 startup.o kernel.o -o kernel.c.bin)
 then
 
 # Собрать Loader -- главный загрузчик

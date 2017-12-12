@@ -1,14 +1,14 @@
 #include "vga.h"
 
 // Чтение регистров с текущего видеорежима
-void display_vga_read_regs(unsigned char *regs)
-{
+void display_vga_read_regs(unsigned char *regs) {
+    
 	unsigned i;
 
-    /* read MISCELLANEOUS reg */    
+    /* read MISCELLANEOUS reg */
 	*regs = IoRead8(VGA_MISC_READ);
 	regs++;
-    
+
     /* read SEQUENCER regs */
 	for(i = 0; i < VGA_NUM_SEQ_REGS; i++)
 	{
@@ -16,7 +16,7 @@ void display_vga_read_regs(unsigned char *regs)
 		*regs = IoRead8(VGA_SEQ_DATA);
 		regs++;
 	}
-    
+
     /* read CRTC regs */
 	for(i = 0; i < VGA_NUM_CRTC_REGS; i++)
 	{
@@ -24,7 +24,7 @@ void display_vga_read_regs(unsigned char *regs)
 		*regs = IoRead8(VGA_CRTC_DATA);
 		regs++;
 	}
-    
+
     /* read GRAPHICS CONTROLLER regs */
 	for(i = 0; i < VGA_NUM_GC_REGS; i++)
 	{
@@ -32,7 +32,7 @@ void display_vga_read_regs(unsigned char *regs)
 		*regs = IoRead8(VGA_GC_DATA);
 		regs++;
 	}
-    
+
     /* read ATTRIBUTE CONTROLLER regs */
 	for (i = 0; i < VGA_NUM_AC_REGS; i++)
 	{
@@ -41,7 +41,7 @@ void display_vga_read_regs(unsigned char *regs)
 		*regs = IoRead8(VGA_AC_READ);
 		regs++;
 	}
-    
+
     /* lock 16-color palette and unblank display */
 	(void)IoRead8(VGA_INSTAT_READ);
 	IoWrite8(VGA_AC_INDEX, 0x20);
@@ -49,13 +49,13 @@ void display_vga_read_regs(unsigned char *regs)
 
 // Запись регистров в VGA-контроллер
 void display_vga_write_regs(unsigned char *regs) {
-    
+
     unsigned i;
 
     /* MISCELLANEOUS регистр */
 	IoWrite8(VGA_MISC_WRITE, *regs);
 	regs++;
-    
+
     /* SEQUENCER регистры */
 	for (i = 0; i < VGA_NUM_SEQ_REGS; i++)
 	{
@@ -63,50 +63,49 @@ void display_vga_write_regs(unsigned char *regs) {
 		IoWrite8(VGA_SEQ_DATA, *regs);
 		regs++;
 	}
-    
+
     /* Разблокировать CRTC регистры */
 	IoWrite8(VGA_CRTC_INDEX, 0x03);
 	IoWrite8(VGA_CRTC_DATA, IoRead8(VGA_CRTC_DATA) | 0x80);
 
 	IoWrite8(VGA_CRTC_INDEX, 0x11);
 	IoWrite8(VGA_CRTC_DATA, IoRead8(VGA_CRTC_DATA) & ~0x80);
-    
+
     /* Оставить разблокированными */
 	regs[ 0x03 ] |= 0x80;
 	regs[ 0x11 ] &= ~0x80;
 
     /* CRTC регистры */
 	for (i = 0; i < VGA_NUM_CRTC_REGS; i++) {
-        
+
 		IoWrite8(VGA_CRTC_INDEX, i);
 		IoWrite8(VGA_CRTC_DATA, *regs);
 		regs++;
 	}
-    
+
     /* GRAPHICS CONTROLLER регистры */
 	for (i = 0; i < VGA_NUM_GC_REGS; i++) {
-        
+
 		IoWrite8(VGA_GC_INDEX, i);
 		IoWrite8(VGA_GC_DATA, *regs);
 		regs++;
 	}
-    
+
     /* ATTRIBUTE CONTROLLER регистры */
 	for (i = 0; i < VGA_NUM_AC_REGS; i++) {
 		(void)IoRead8(VGA_INSTAT_READ);
-		IoWrite8(VGA_AC_INDEX, i);        
-		IoWrite8(VGA_AC_WRITE, *regs);        
+		IoWrite8(VGA_AC_INDEX, i);
+		IoWrite8(VGA_AC_WRITE, *regs);
 		regs++;
 	}
-    
+
     /* Запкрепить 16-цветовую палитру и разблокировать дисплей */
 	(void)IoRead8(VGA_INSTAT_READ);
-	IoWrite8(VGA_AC_INDEX, 0x20);    
+	IoWrite8(VGA_AC_INDEX, 0x20);
 }
 
 // Писать пиксель
-void display_vga_pixel(unsigned x, unsigned y, unsigned char c)
-{
+void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
     char* vaddr = (char*)0xA0000;
 
     uint16_t symbol = (x >> 3) + y*80;
@@ -122,69 +121,91 @@ void display_vga_pixel(unsigned x, unsigned y, unsigned char c)
 
 // Установка определенного видеорежима
 void display_vga_mode(int mode) {
-        
+
     switch (mode) {
-        
-        case VGA_640x480: 
-                    
+
+        case VGA_640x480:
+
             // -- todo палитру
             display_vga_write_regs( (unsigned char*)disp_vga_640x480x16 );
             IoWrite16(VGA_GC_INDEX, 0x0205);
             break;
-        
+
         case VGA_320x200:
-        
+
             // -- todo палитру
             display_vga_write_regs( (unsigned char*)disp_vga_320x200x256 );
             break;
-    }    
+    }
 
     disp_vga_lastmode = mode;
 }
 
 // Быстрая очистка экрана
 void display_vga_cls(int color) {
-    
+
     int i;
     char* vaddr = (char*)0xA0000;
 
     switch (disp_vga_lastmode) {
-    
-    
+
+
         case VGA_640x480:
-        
+
             IoWrite16(VGA_GC_INDEX, 0xFF08);
-            for (i = 0; i < 80*480; i++) {            
+            for (i = 0; i < 80*480; i++) {
                 volatile uint8_t t = vaddr[ i ];
                 vaddr[ i ] = color;
             }
-            
+
             break;
     }
-    
+
 }
 
 // Печать символа на экране
 void display_vga_pchar(int x, int y, unsigned char c, char color) {
-    
+
     int i, j, f = c * 16;
-    
-    for (i = 0; i < 16; i++) {        
-        for (j = 0; j < 8; j++) {            
+
+    for (i = 0; i < 16; i++) {
+        for (j = 0; j < 8; j++) {
             if (disp_vga_8x16_font[ f + i] & (1 << (7 - j)))
-                display_vga_pixel(x + j, y + i, color);        
+                display_vga_pixel(x + j, y + i, color);
         }
-    }    
+    }
 }
 
-// Печать строки
-void display_vga_print(int x, int y, char* string, char color) {
-    
+// Печать строки UTF-8
+void display_vga_putf8(int x, int y, char* string, char color) {
+
     while(*string) {
-        
-        display_vga_pchar(x, y, *string, color);
-        x += 8;
-        string++;        
+
+        unsigned char chr = *string;
+
+        // Преобразовать UTF-8 в RUS
+        if (chr == 0xD0) {
+
+            string++;
+            chr = (*string) - 0x10;
+
+        }
+        else if (chr == 0xD1) {
+
+            string++;
+            chr = (*string);
+
+            if (chr < 0xB0)
+                chr = chr + 0x60;
+            else
+                chr = chr + 0x10;
+        }
+
+        // Псевдографика недоступна
+        display_vga_pchar(8*x, 16*y, chr, color);
+
+        x += 1;
+        string++;
     }
-    
+
 }
