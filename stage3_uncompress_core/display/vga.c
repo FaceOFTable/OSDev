@@ -1,5 +1,6 @@
 #include "vga.h"
 
+// Чтение регистров с текущего видеорежима
 void display_vga_read_regs(unsigned char *regs)
 {
 	unsigned i;
@@ -38,7 +39,6 @@ void display_vga_read_regs(unsigned char *regs)
 		(void)IoRead8(VGA_INSTAT_READ);
 		IoWrite8(VGA_AC_INDEX, i);
 		*regs = IoRead8(VGA_AC_READ);
-brk;        
 		regs++;
 	}
     
@@ -52,11 +52,11 @@ void display_vga_write_regs(unsigned char *regs) {
     
     unsigned i;
 
-    /* write MISCELLANEOUS reg */
+    /* MISCELLANEOUS регистр */
 	IoWrite8(VGA_MISC_WRITE, *regs);
 	regs++;
     
-    /* write SEQUENCER regs */
+    /* SEQUENCER регистры */
 	for (i = 0; i < VGA_NUM_SEQ_REGS; i++)
 	{
 		IoWrite8(VGA_SEQ_INDEX, i);
@@ -64,18 +64,18 @@ void display_vga_write_regs(unsigned char *regs) {
 		regs++;
 	}
     
-    /* unlock CRTC registers */
+    /* Разблокировать CRTC регистры */
 	IoWrite8(VGA_CRTC_INDEX, 0x03);
 	IoWrite8(VGA_CRTC_DATA, IoRead8(VGA_CRTC_DATA) | 0x80);
 
 	IoWrite8(VGA_CRTC_INDEX, 0x11);
 	IoWrite8(VGA_CRTC_DATA, IoRead8(VGA_CRTC_DATA) & ~0x80);
     
-    /* make sure they remain unlocked */
+    /* Оставить разблокированными */
 	regs[ 0x03 ] |= 0x80;
 	regs[ 0x11 ] &= ~0x80;
 
-    /* write CRTC regs */
+    /* CRTC регистры */
 	for (i = 0; i < VGA_NUM_CRTC_REGS; i++) {
         
 		IoWrite8(VGA_CRTC_INDEX, i);
@@ -83,7 +83,7 @@ void display_vga_write_regs(unsigned char *regs) {
 		regs++;
 	}
     
-    /* write GRAPHICS CONTROLLER regs */
+    /* GRAPHICS CONTROLLER регистры */
 	for (i = 0; i < VGA_NUM_GC_REGS; i++) {
         
 		IoWrite8(VGA_GC_INDEX, i);
@@ -91,7 +91,7 @@ void display_vga_write_regs(unsigned char *regs) {
 		regs++;
 	}
     
-    /* write ATTRIBUTE CONTROLLER regs */
+    /* ATTRIBUTE CONTROLLER регистры */
 	for (i = 0; i < VGA_NUM_AC_REGS; i++) {
 		(void)IoRead8(VGA_INSTAT_READ);
 		IoWrite8(VGA_AC_INDEX, i);        
@@ -99,7 +99,7 @@ void display_vga_write_regs(unsigned char *regs) {
 		regs++;
 	}
     
-    /* lock 16-color palette and unblank display */
+    /* Запкрепить 16-цветовую палитру и разблокировать дисплей */
 	(void)IoRead8(VGA_INSTAT_READ);
 	IoWrite8(VGA_AC_INDEX, 0x20);    
 }
@@ -107,7 +107,7 @@ void display_vga_write_regs(unsigned char *regs) {
 // Писать пиксель
 void display_vga_pixel(unsigned x, unsigned y, unsigned char c)
 {
-    char* video_addr = (char*)0xA0000;
+    char* vaddr = (char*)0xA0000;
 
     uint16_t symbol = (x >> 3) + y*80;
     uint16_t mask = 0x8000 >> (x & 7);
@@ -116,13 +116,13 @@ void display_vga_pixel(unsigned x, unsigned y, unsigned char c)
 	IoWrite16(VGA_GC_INDEX, 0x08 | mask);
 
     // Читать перед записью, иначе не сработает
-    volatile uint8_t t = video_addr[ symbol ];
-    video_addr[ symbol ] = c;
+    volatile uint8_t t = vaddr[ symbol ];
+    vaddr[ symbol ] = c;
 }
 
 // Установка определенного видеорежима
 void display_vga_mode(int mode) {
-    
+        
     switch (mode) {
         
         case VGA_640x480: 
@@ -138,4 +138,53 @@ void display_vga_mode(int mode) {
             display_vga_write_regs( (unsigned char*)disp_vga_320x200x256 );
             break;
     }    
+
+    disp_vga_lastmode = mode;
+}
+
+// Быстрая очистка экрана
+void display_vga_cls(int color) {
+    
+    int i;
+    char* vaddr = (char*)0xA0000;
+
+    switch (disp_vga_lastmode) {
+    
+    
+        case VGA_640x480:
+        
+            IoWrite16(VGA_GC_INDEX, 0xFF08);
+            for (i = 0; i < 80*480; i++) {            
+                volatile uint8_t t = vaddr[ i ];
+                vaddr[ i ] = color;
+            }
+            
+            break;
+    }
+    
+}
+
+// Печать символа на экране
+void display_vga_pchar(int x, int y, unsigned char c, char color) {
+    
+    int i, j, f = c * 16;
+    
+    for (i = 0; i < 16; i++) {        
+        for (j = 0; j < 8; j++) {            
+            if (disp_vga_8x16_font[ f + i] & (1 << (7 - j)))
+                display_vga_pixel(x + j, y + i, color);        
+        }
+    }    
+}
+
+// Печать строки
+void display_vga_print(int x, int y, char* string, char color) {
+    
+    while(*string) {
+        
+        display_vga_pchar(x, y, *string, color);
+        x += 8;
+        string++;        
+    }
+    
 }
