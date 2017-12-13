@@ -2,7 +2,7 @@
  * Поиск и открытие виртуального файла
  */
 
-uint32_t fs_initrd_open(const char* filename) {
+uint32_t fs_fat12_open(const char* filename) {
     
     // vfs_search_free_descriptor();
     

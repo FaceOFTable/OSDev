@@ -1,21 +1,22 @@
 #include "vfs.h"
-
-// --------- InitRD FS ------------
+#include "fat12.h"
 #include "initrd.h"
-#include "initrd/file_open.c"
 
-// --------------------------------
+#include "fat12/open.c"
 
-// Искать не занятый файловый дескриптор
-uint32_t vfs_search_free_descriptor() {
+/*
+ * Инициализация файловых дескрипторов в NULL
+ */
+
+void fs_init() {
     
-    uint32_t id, i;
+    int i;
     
-    for (i = 1; i < 256; i++) {
-        if (file_descriptors[i] == 0) {
-            return i;
-        }
-    }
+    // Размаппить на RAM-диск, т.к. реального диска все равно не будет
+    for (i = 0; i < 256; i++) { 
+               
+        fat12_desc[i].busy = 0;
+        fat12_desc[i].device_id = FAT12_DEVICE_RAM;
+    }    
     
-    return 0;
 }

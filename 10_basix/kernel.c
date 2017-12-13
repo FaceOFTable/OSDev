@@ -20,8 +20,9 @@ void main() {
     kernel_pic_redirect(IRQ_KEYB);
     kernel_isr_init();        
 
+    fs_init();
 
-    fs_initrd_open("/walls/main.gif");
+    fs_fat12_open("/walls/main.gif");
     
     ui_start();
 
