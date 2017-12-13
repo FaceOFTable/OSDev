@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "kernel/strings.h"
 #include "kernel/strings.c"
+#include "mm/helpers.c"
 #include "mm/palloc.c"
 #include "mm/kalloc.c"
 #include "fs/vfs.c"
@@ -22,7 +23,7 @@ void main() {
 
     fs_init();
 
-    fs_fat12_open("/walls/main.gif");
+    fs_fat12_open("/walls/mainx.gif");
     
     ui_start();
 
