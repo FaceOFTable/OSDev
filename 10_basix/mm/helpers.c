@@ -18,3 +18,10 @@ uint32_t mm_readd(uint32_t addr) {
     uint8_t* paddr = (uint8_t*)addr;
     return paddr[0] + (paddr[1] << 8) + (paddr[2] << 16) + (paddr[3] << 24);
 }
+
+// Писать BYTE в память
+void mm_writeb(uint32_t addr, uint8_t data) {
+    
+    uint8_t* paddr = (uint8_t*)addr;
+    paddr[0] = data;
+}

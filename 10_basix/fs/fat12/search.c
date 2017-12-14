@@ -15,7 +15,7 @@ int fs_fat12_find(int file_id) {
     int id, k;
 
     // Поиск файла производится в главной директории (после FAT)
-    if (fat12_desc[file_id].cluster_dir == 0) {
+    if (fat12_desc[ file_id ].cluster_dir == 0) {
         
         // Точка входа в директорию
         uint32_t rootdir = INITRD_START + fat12_desc[ file_id ].start_root * 512;
@@ -71,7 +71,7 @@ int fs_fat12_find(int file_id) {
             
             // Получить следующий кластер
             rootdir = INITRD_START + 512 * fat12_desc[ file_id ].start_fat + ((3*cluster)>>1);        
-            cluster = cluster % 2 ? mm_readw(rootdir) >> 4 : mm_readw(rootdir);
+            cluster = cluster % 2 ? mm_readw(rootdir) >> 4 : mm_readw(rootdir) & 0xfff;
 
             // Последний кластер
             if (cluster >= 0x0FF0) {

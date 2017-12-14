@@ -33,7 +33,7 @@ struct FS_FAT12 {
     uint16_t    start_fat;              // Сектор начала FAT
     uint16_t    start_root;             // Сектор начала RootEntries
     uint16_t    start_data;             // Сектор начала DATA
-    
+
 };
 
 // Описатели дескрипторов
@@ -48,4 +48,4 @@ uint8_t FAT12_ITEM[11];
 
 #include "fat12/search.c"
 #include "fat12/open.c"
-#include "fat12/load.c"
+#include "fat12/read.c"

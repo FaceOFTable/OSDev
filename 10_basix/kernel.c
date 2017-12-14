@@ -24,7 +24,6 @@ void main() {
     fs_init();
 
     int fd = fs_fat12_open("/walls/main.gif");
-brk;    
     uint32_t m = fs_fat12_load(fd);
     
     ui_start();
