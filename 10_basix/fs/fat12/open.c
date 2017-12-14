@@ -52,9 +52,5 @@ uint32_t fs_fat12_open(const char* filename) {
         }   
     }
 
-    // Разбить на части
-    // Каждую часть нормализовать
-    // Просматривать каталоги
-
     return file_id;
 }

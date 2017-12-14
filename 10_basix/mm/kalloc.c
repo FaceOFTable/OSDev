@@ -30,7 +30,9 @@ uint32_t kalloc(uint32_t size) {
         uint32_t* pagemap = (uint32_t*)mm_allocator[ mm_cursor ];
         
         // Необходимая область памяти
-        pagemap[ page_id ] = (cursor & 0xFFFFF000) | 3;
+        if (!(pagemap[ page_id ] & PT_PRESENT)) {                    
+            pagemap[ page_id ] = palloc() | 3;
+        }
     }
 
     // Отметка вершины

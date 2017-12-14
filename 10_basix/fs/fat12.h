@@ -48,3 +48,4 @@ uint8_t FAT12_ITEM[11];
 
 #include "fat12/search.c"
 #include "fat12/open.c"
+#include "fat12/load.c"
