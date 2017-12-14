@@ -1,31 +1,5 @@
 #include "put_bmp.h"
 
-int abs(int __x) {    
-    return __x < 0 ? -__x : __x;
-}
-
-// -------
-uint8_t colortable_16[48] = {
-    
-    0, 0, 0,
-    0, 0, 128,
-    0, 128, 0,
-    0, 128, 128,
-    128, 0, 0,
-    128, 0, 128,
-    128, 128, 0,
-    192, 192, 192,
-    128, 128, 128,
-    0, 0, 255,
-    0, 255, 0,
-    0, 255, 255,
-    255, 0, 0,
-    255, 0, 255,
-    255, 255, 0,
-    255, 255, 255,
-
-};
-
 /*
  * Рисование BMP
  */
@@ -50,12 +24,40 @@ void ui_put_bmp(uint32_t addr, int x, int y, uint32_t opacity) {
     uint16_t height = mm_readd(addr + 0x16);
     uint16_t bits   = mm_readw(addr + 0x1C);
     uint32_t color_table = addr + 0x0E + mm_readw(addr + 0x0E);
-    
-    // @todo Сделать потом корректирующую буферизацию для floyd-steinberg
+
+    // Построение таблицы преобразований (только 16 или 256)
+    if (bits == 4 || bits == 5) {
+
+        for (i = 0; i < (bits == 4 ? 16 : 256); i++) {
+            
+            uint8_t  closest = 0;
+            uint32_t closest_diff = -1;
+            uint32_t diff;
+
+            for (j = 0; j < 16; j++) {
+                          
+                 diff = color_distance(
+                    mm_readb(color_table + i*4 + 2),    
+                    mm_readb(color_table + i*4 + 1),    
+                    mm_readb(color_table + i*4 + 0),    
+                    vga_palette_16[j*3 + 0],
+                    vga_palette_16[j*3 + 1],
+                    vga_palette_16[j*3 + 2]
+                );
+                
+                if (closest_diff > diff) {
+                    closest_diff = diff;
+                    closest = j;
+                }                                        
+            }
+            
+            bmp_palette_convert[i] = closest;
+        }
+    }
     
     // 16 цветов
     if (bits == 4) {
-   
+
         for (i = 0; i < height; i++) {
 
             for (j = 0; j < width; j++) {
@@ -75,29 +77,8 @@ void ui_put_bmp(uint32_t addr, int x, int y, uint32_t opacity) {
                     if (opacity == color) {
                         continue;
                     }
-      
-                    uint8_t r = mm_readb(color_table + color*4 + 2);
-                    uint8_t g = mm_readb(color_table + color*4 + 1);
-                    uint8_t b = mm_readb(color_table + color*4 + 0);
-                    
-                    uint8_t closest = 0;
-                    uint32_t closest_diff = -1;
 
-                    // поиск ближайшего цвета
-                    for (k = 0; k < 16; k++) {
-
-                        // Расчет методом квадратного приближения
-                        int diff = (colortable_16[k*3 + 0] - r) * (colortable_16[k*3 + 0] - r) + 
-                                   (colortable_16[k*3 + 1] - g) * (colortable_16[k*3 + 1] - g) +
-                                   (colortable_16[k*3 + 2] - b) * (colortable_16[k*3 + 2] - b);
-                                            
-                        if (closest_diff > diff) {
-                            closest_diff = diff;
-                            closest = k;
-                        } 
-                    }
-
-                    display_vga_pixel(x + j, y + i, closest);
+                    display_vga_pixel(x + j, y + i, bmp_palette_convert[ color ]);
                 }
             }
         }

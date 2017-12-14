@@ -119,14 +119,15 @@ void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
 
         // Читать перед записью, иначе не сработает
         volatile uint8_t t = vaddr[ symbol ];
-        vaddr[ symbol ] = c;
-        
+        vaddr[ symbol ] = c;    
     }
 }
 
 // Установка определенного видеорежима
 void display_vga_mode(int mode) {
 
+    int i;
+    
     switch (mode) {
 
         case VGA_640x480:
@@ -136,6 +137,12 @@ void display_vga_mode(int mode) {
             
             // Режим 2 (регистр выбор режима 5) 
             // -- режим записи 1 слой цвета - 1 бит
+            for (i = 0; i < 16; i++) {
+                IoWrite8(VGA_DAC_WRITE_INDEX, i);
+                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 0] >> 2);
+                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 1] >> 2);
+                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 2] >> 2);
+            }
             
             IoWrite16(VGA_GC_INDEX, 0x0205);
             break;
@@ -217,4 +224,23 @@ void display_vga_putf8(int x, int y, char* string, char color) {
         string++;
     }
 
+}
+
+// Расчет дистанции (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2 
+uint32_t color_distance(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2) {
+    
+    return (r1 - r2) * (r1 - r2) + 
+           (g1 - g2) * (g1 - g2) + 
+           (b1 - b2) * (b1 - b2); 
+}
+
+// 50% полупрозрачный блок сплошного цвета
+void display_vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
+    
+    int i, j;    
+    for (i = y1; i < y2; i++) {    
+        for (j = x1 + i%2; j < x2; j += 2) {
+            display_vga_pixel(j, i, color);
+        }        
+    }    
 }
