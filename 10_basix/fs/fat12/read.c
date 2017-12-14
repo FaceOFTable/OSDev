@@ -54,7 +54,7 @@ uint32_t fs_fat12_read(uint32_t addr, uint32_t size, int file_id) {
 }
 
 /*
- * Загрузка файла целиком
+ * Загрузка файла целиком в память
  */
  
 uint32_t fs_fat12_load(uint16_t file_id) {
@@ -65,7 +65,7 @@ uint32_t fs_fat12_load(uint16_t file_id) {
     if (fat12_desc[ file_id ].current + size > fat12_desc[ file_id ].file_size) {
         return 0;
     }
-    
+
     // Выделить пространство
     uint32_t addr = kalloc(size);
 

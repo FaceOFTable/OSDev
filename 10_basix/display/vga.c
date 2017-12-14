@@ -108,16 +108,20 @@ void display_vga_write_regs(unsigned char *regs) {
 void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
     
     char* vaddr = (char*)0xA0000;
+    
+    if (x < 640 && y < 480) {
 
-    uint16_t symbol = (x >> 3) + y*80;
-    uint16_t mask = 0x8000 >> (x & 7);
+        uint16_t symbol = (x >> 3) + y*80;
+        uint16_t mask = 0x8000 >> (x & 7);
 
-    // Установка маски, регистр 8 (вертикальная запись в слои)
-	IoWrite16(VGA_GC_INDEX, 0x08 | mask);
+        // Установка маски, регистр 8 (вертикальная запись в слои)
+        IoWrite16(VGA_GC_INDEX, 0x08 | mask);
 
-    // Читать перед записью, иначе не сработает
-    volatile uint8_t t = vaddr[ symbol ];
-    vaddr[ symbol ] = c;
+        // Читать перед записью, иначе не сработает
+        volatile uint8_t t = vaddr[ symbol ];
+        vaddr[ symbol ] = c;
+        
+    }
 }
 
 // Установка определенного видеорежима

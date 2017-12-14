@@ -73,7 +73,7 @@ image_found:
 	mov	    ebx, eax            
 	lodsw                   ; dwHeight
 	inc	    esi
-	cmp	    byte [esi], 8   ; Code Size
+	cmp	    byte [esi], 8   ; LWZ минимальная длина кода = 8 + 1 (9 бит)
 	jne	    picture_error
 	inc	    esi
 

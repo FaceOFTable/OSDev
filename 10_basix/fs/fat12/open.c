@@ -53,7 +53,14 @@ uint32_t fs_fat12_open(const char* filename) {
         
         // Текущий кластер файла == найденному последнему файлу
         fat12_desc[ file_id ].cluster_current = fat12_desc[ file_id ].cluster_dir;
+        fat12_desc[ file_id ].busy = 1;
     }
 
     return file_id;
+}
+
+// Закрыть дескриптор
+void fs_fat12_close(int file_id) {
+
+    fat12_desc[ file_id ].busy = 0;
 }

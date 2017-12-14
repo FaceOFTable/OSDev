@@ -1,9 +1,28 @@
+/*
+ * Создать массивы для работы с графикой
+ */
+ 
+void ui_init() {
+    
+    gif_chunks  = 0; // kalloc(512 * 1024);
+    gif_surface = 0; // kalloc(512 * 1024);
+    
+}
 
 // Выдача и обработка стартового простого интерфейса
 void ui_start() {
     
     display_vga_mode(VGA_640x480);
-    display_vga_cls(1);        
+    display_vga_cls(1);      
+    
+
+    // -- test --
+    int fd = fs_fat12_open("/walls/main.bmp");
+    uint32_t mem = fs_fat12_load(fd);
+    fs_fat12_close(fd);       
+    
+    ui_put_bmp(mem, 0, 225, -1);
+      
     display_vga_putf8(1, 1, "Вас приветствует программа установки системы", 11);
     display_vga_putf8(1, 3, "Откиньтесь на спинку кресла и наслаждайтесь бесконечностью установки ОС.", 7);
     display_vga_putf8(1, 4, "Поверьте, вы заслужили отдых от трудов и я, компьютер, о вас позабочусь!", 7);

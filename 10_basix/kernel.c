@@ -11,6 +11,7 @@
 #include "kernel/init.c"
 #include "display/util.c"
 #include "display/vga.c"
+#include "ui/put_image.c"
 #include "ui/start.c"
 
 // ---------------------------------------------------------------------
@@ -19,15 +20,12 @@ void main() {
 
     kernel_init();
     kernel_pic_redirect(IRQ_KEYB);
-    kernel_isr_init();        
-
+    kernel_isr_init();
     fs_init();
-
-    int fd = fs_fat12_open("/walls/main.gif");
-    uint32_t m = fs_fat12_load(fd);
-    
+    ui_init();
+     
     ui_start();
-
+    
     sti;
     for(;;);
 }
