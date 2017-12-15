@@ -1,27 +1,30 @@
 // Читать BYTE из памяти
-uint8_t mm_readb(uint32_t addr) {
-    
-    uint8_t* paddr = (uint8_t*)addr;
-    return *paddr;    
+uint8_t mm_readb(uint32_t addr) {    
+    return *((uint8_t*)(addr));
 }
 
 // Читать WORD из памяти
 uint16_t mm_readw(uint32_t addr) {
     
-    uint8_t* paddr = (uint8_t*)addr;
-    return paddr[0] + (paddr[1] << 8);
+    return *((uint16_t*)(addr));
 }
 
 // Читать DWORD из памяти
 uint32_t mm_readd(uint32_t addr) {
-    
-    uint8_t* paddr = (uint8_t*)addr;
-    return paddr[0] + (paddr[1] << 8) + (paddr[2] << 16) + (paddr[3] << 24);
+    return *((uint32_t*)(addr));
 }
 
 // Писать BYTE в память
 void mm_writeb(uint32_t addr, uint8_t data) {
-    
-    uint8_t* paddr = (uint8_t*)addr;
-    paddr[0] = data;
+    *((uint8_t*)(addr)) = data;
+}
+
+// Писать WORD в память
+void mm_writew(uint32_t addr, uint16_t data) {
+    *((uint16_t*)(addr)) = data;
+}
+
+// Писать DWORD в память
+void mm_writed(uint32_t addr, uint32_t data) {
+    *((uint32_t*)(addr)) = data;
 }

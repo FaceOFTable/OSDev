@@ -19,10 +19,14 @@
 void main() {
 
     kernel_init();
+
     kernel_pic_redirect(IRQ_KEYB);
     kernel_isr_init();
     fs_init();
     ui_init();
+    
+    ui_load_bmp("/walls/forest.bmp");
+    
      
     ui_start();
     

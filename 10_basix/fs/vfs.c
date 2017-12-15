@@ -22,3 +22,34 @@ void fs_init() {
     }    
     
 }
+
+/*
+ * Открытие файла из VFS
+ */
+uint32_t fopen(const char* filename, const char* mode) {
+    
+    // Пока что только из FAT12
+    return fs_fat12_open(filename);
+    
+}
+
+/*
+ * Чтение файла или его части из VFS
+ */
+ 
+uint32_t fread(void* ptr, uint32_t size, uint32_t n, uint32_t file_id) {
+    
+    // Пока что только FAT12
+    return fs_fat12_read((uint32_t)ptr, n * size, file_id);    
+}
+
+/*
+ * Закрытие файла
+ */
+ 
+void fclose(file_id) {
+    
+    // Пока что только FAT12
+    fs_fat12_close(file_id);
+    
+}

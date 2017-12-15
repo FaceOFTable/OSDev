@@ -13,16 +13,15 @@ void ui_init() {
 void ui_start() {
     
     display_vga_mode(VGA_640x480);
-    display_vga_cls(1);      
+    display_vga_cls(1);
     
-
     // -- test --
-    int fd = fs_fat12_open("/walls/forest.bmp"); // main.bmp
-    uint32_t mem = fs_fat12_load(fd);
-    fs_fat12_close(fd);      
+    // int fd = fs_fat12_open("/walls/forest.bmp"); // main.bmp
+    // uint32_t mem = fs_fat12_load(fd);
+    // fs_fat12_close(fd);      
     // -- test -- 
     
-    ui_put_bmp(mem, 0, 0, -1); // 225
+    // ui_put_bmp(mem, 0, 0, -1); // 225
     
     display_vga_dotted_block(0,0,640,225,1);
       
