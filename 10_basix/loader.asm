@@ -18,7 +18,6 @@
         macro   brk {  xchg    bx, bx }
 
         ; Загрузка регистра GDT/IDT
-        cli
         mov     sp, 7C00h
 
         lgdt    [GDTR]
@@ -31,7 +30,12 @@
         mov     ax, 0003h
         int     10h
 
+        xor     ax, ax
+        mov     fs, ax
+        mov     gs, ax
+
         ; Вход в Protected Mode
+        cli
         mov     eax, cr0
         or      al, 1
         mov     cr0, eax

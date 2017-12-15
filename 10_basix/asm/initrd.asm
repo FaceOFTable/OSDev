@@ -219,8 +219,8 @@ CLUSTR: dw 0010h  ; 0 | размер DAP = 16
         dq 0      ; 8 | номер сектора [0..n - 1]
 
 ; ----------------------------------------------------------------------
-start_fat   dd ?
-start_data  dd ?
+start_fat   dd 0
+start_data  dd 0
 start_xms   dd 00200000h
 initrd_size dd 0
 

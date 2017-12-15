@@ -9,6 +9,21 @@ void ui_init() {
     
 }
 
+// Печать HEX-строки
+void ui_hexprint(uint32_t value, int digs, int x, int y, int color) {
+    
+    int i;
+    
+    for (i = 0; i < digs; i++) {
+        
+        uint8_t c = (value >> (4*(digs - i - 1))) & 0xf;
+        
+        c = c > 9 ? c + 7 : c;        
+        display_vga_pchar(8*(x + i), 16*y, '0' + c, color);        
+    }
+    
+}
+
 // Выдача и обработка стартового простого интерфейса
 void ui_start() {
     
@@ -20,8 +35,46 @@ void ui_start() {
     ui_put_bmp(u, 0, 0, -1);    
 // ---    
     
+    display_vga_dotted_block(0,480-48,640,479,0);
+
+    uint32_t v1 = ui_load_bmp("/icon/mycomp.bmp");
+    uint32_t v2 = ui_load_bmp("/icon/msdos.bmp");
+    
+    display_vga_dotted_block(64-3,480-44,64+32+4,480-4,8); // +1
+
+    ui_put_bmp(v1, 8, 480-40, 13);
+    ui_put_bmp(v2, 64, 480-40, 13);
+    
+    display_vga_block(64-8,480-48-200,64-8,480-48,15);
+    display_vga_block(64+320,480-48-200,64+320,480-48,7);
+    display_vga_block(64-8,480-48-200,64+320,480-48-200,15);
+    display_vga_dotted_block(64-8,480-48-200,64+320,480-48,0);
+
+    display_vga_putf8(8, 15, "PCI листинг", 15);
+
+
+    // -- вывод pci --
+    int id = 17;
+    uint32_t slot, bus;
+    
+	for (bus = 0; bus < MAX_BUS; bus++) {
+		for (slot = 0; slot < MAX_SLOTS; slot++) {
+            
+            uint32_t pcid = adapters[ bus ][ slot ];
+            if (pcid != -1) {
+                
+                ui_hexprint(pcid >> 16,4, 9,id,15);
+                ui_hexprint(pcid, 4, 9 + 5,id,15);
+                id++;
+            }
+			 
+        }
+    }
+    // --
+                
+
+/*      
     display_vga_dotted_block(0,0,640,225,1);
-      
     display_vga_putf8(1, 1, "Вас приветствует программа установки системы", 11);
     display_vga_putf8(1, 3, "Откиньтесь на спинку кресла и наслаждайтесь бесконечностью установки ОС.", 15);
     display_vga_putf8(1, 4, "Поверьте, вы заслужили отдых от трудов и я, компьютер, о вас позабочусь!", 15);
@@ -31,4 +84,5 @@ void ui_start() {
     display_vga_putf8(1, 9, "Теперь у вас появилась реальная возможность мечтать о настоящих 3D-играх,", 15);
     display_vga_putf8(1, 10, "а все потому, что тут даже Doom не работает, так что забудьте про NVidia, ATI", 15);
     display_vga_putf8(1, 11, "и просто наслаждайтесь отсутствием зависимости от игр.", 15);  
+*/
 }

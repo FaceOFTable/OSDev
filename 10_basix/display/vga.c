@@ -238,8 +238,20 @@ uint32_t color_distance(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t 
 void display_vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
     
     int i, j;    
-    for (i = y1; i < y2; i++) {    
-        for (j = x1 + i%2; j < x2; j += 2) {
+    for (i = y1; i <= y2; i++) {    
+        for (j = x1 + i%2; j <= x2; j += 2) {
+            display_vga_pixel(j, i, color);
+        }        
+    }    
+}
+
+
+// Блок сплошного цвета
+void display_vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
+    
+    int i, j;    
+    for (i = y1; i <= y2; i++) {    
+        for (j = x1; j <= x2; j++) {
             display_vga_pixel(j, i, color);
         }        
     }    
