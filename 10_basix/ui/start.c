@@ -45,16 +45,17 @@ void ui_start() {
     ui_put_bmp(v1, 8, 480-40, 13);
     ui_put_bmp(v2, 64, 480-40, 13);
     
-    display_vga_block(64-8,480-48-200,64-8,480-48,15);
-    display_vga_block(64+320,480-48-200,64+320,480-48,7);
-    display_vga_block(64-8,480-48-200,64+320,480-48-200,15);
-    display_vga_dotted_block(64-8,480-48-200,64+320,480-48,0);
+    int x1 = 56, y1 = 28, x2 = 384, y2 = 480 - 52;
+    display_vga_block(x1,y1,x1,y2,15);
+    display_vga_block(x2,y1,x2,y2,7);
+    display_vga_block(x1,y1,x2,y1,15);
+    display_vga_dotted_block(x1,y1,x2,y2,0);
 
-    display_vga_putf8(8, 15, "PCI листинг", 15);
+    display_vga_putf8(8, 2, "PCI листинг", 15);
 
 
     // -- вывод pci --
-    int id = 17;
+    int id = 4;
     uint32_t slot, bus;
     
 	for (bus = 0; bus < MAX_BUS; bus++) {
