@@ -35,7 +35,7 @@ uint32_t fs_fat12_read(uint32_t addr, uint32_t size, int file_id) {
             file->cluster_current = cluster;            
             cluster_start = INITRD_START + 512 * file->start_data + (cluster - 2) * cluster_size;
 
-            // Обнаружен конец файла, загрузка более невозможна
+            // Обнаружен реальный конец файла, загрузка более невозможна
             if (cluster >= 0x0FF0) {
                 break;
             }
@@ -43,9 +43,9 @@ uint32_t fs_fat12_read(uint32_t addr, uint32_t size, int file_id) {
          
          file->current += 1;
          
-         // Обнаружен неожиданный конец файла
+         // Обнаружен конец файла
          // Запрошенное кол-во байт не будет скачано
-         if (file->current > file->file_size) {
+         if (file->current >= file->file_size) {
              break;
          }
     }
@@ -54,7 +54,7 @@ uint32_t fs_fat12_read(uint32_t addr, uint32_t size, int file_id) {
 }
 
 /*
- * Загрузка файла целиком в память
+ * Загрузка файла целиком в память с выделением новой памяти
  */
  
 uint32_t fs_fat12_load(uint16_t file_id) {
@@ -70,7 +70,9 @@ uint32_t fs_fat12_load(uint16_t file_id) {
     uint32_t addr = kalloc(size);
 
     // Загрузка файла в память
-    fs_fat12_read(addr, size, file_id);    
+    if (addr) {        
+        fs_fat12_read(addr, size, file_id);    
+    }
 
     return addr;
 }

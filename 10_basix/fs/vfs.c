@@ -26,7 +26,7 @@ void fs_init() {
 /*
  * Открытие файла из VFS
  */
-uint32_t fopen(const char* filename, const char* mode) {
+uint32_t fopen(const char* filename) {
     
     // Пока что только из FAT12
     return fs_fat12_open(filename);
@@ -37,10 +37,10 @@ uint32_t fopen(const char* filename, const char* mode) {
  * Чтение файла или его части из VFS
  */
  
-uint32_t fread(void* ptr, uint32_t size, uint32_t n, uint32_t file_id) {
+uint32_t fread(void* ptr, uint32_t size, uint32_t file_id) {
     
     // Пока что только FAT12
-    return fs_fat12_read((uint32_t)ptr, n * size, file_id);    
+    return fs_fat12_read((uint32_t)ptr, size, file_id);    
 }
 
 /*

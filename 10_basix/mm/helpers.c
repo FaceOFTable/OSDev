@@ -4,8 +4,7 @@ uint8_t mm_readb(uint32_t addr) {
 }
 
 // Читать WORD из памяти
-uint16_t mm_readw(uint32_t addr) {
-    
+uint16_t mm_readw(uint32_t addr) {    
     return *((uint16_t*)(addr));
 }
 

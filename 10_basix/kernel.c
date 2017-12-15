@@ -25,9 +25,6 @@ void main() {
     fs_init();
     ui_init();
     
-    ui_load_bmp("/walls/forest.bmp");
-    
-     
     ui_start();
     
     sti;

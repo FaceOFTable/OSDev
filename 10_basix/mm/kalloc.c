@@ -41,3 +41,21 @@ uint32_t kalloc(uint32_t size) {
     return alloc_addr;
     
 }
+
+
+// Выделение новой области памяти ядра, с записью информации о размере
+uint32_t malloc(uint32_t size) {
+    
+    // --- сделать проверку на пустые области
+        
+    uint32_t alloc = kalloc(size + 4);
+    if (alloc) {
+        
+        mm_writed(alloc, size);
+        return alloc + 4;
+    }
+    
+    return 0;
+
+}
+
