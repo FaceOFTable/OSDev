@@ -26,6 +26,7 @@ void fs_init() {
 /*
  * Открытие файла из VFS
  */
+ 
 uint32_t fopen(const char* filename) {
     
     // Пока что только из FAT12
@@ -50,6 +51,17 @@ uint32_t fread(void* ptr, uint32_t size, uint32_t file_id) {
 void fclose(file_id) {
     
     // Пока что только FAT12
-    fs_fat12_close(file_id);
+    if (file_id) {        
+        fs_fat12_close(file_id);
+    }
     
+}
+
+/*
+ * Получить размер файла из его описателя
+ */
+
+uint32_t fsize(int file_id) {
+    
+    return fat12_desc[ file_id ].file_size;
 }

@@ -9,6 +9,7 @@
 #include "kernel/pic_redirect.c"
 #include "kernel/isr_init.c"
 #include "kernel/pic_keyb.c"
+#include "kernel/app.c"
 #include "kernel/init.c"
 #include "display/util.c"
 #include "display/vga.c"
@@ -27,6 +28,10 @@ void main() {
     ui_init();
     
     ui_start();
+    
+    // BIN-это откомпилированная программа
+brk;    
+    app_load_raw("app/desktop.raw");
     
     sti;
     for(;;);

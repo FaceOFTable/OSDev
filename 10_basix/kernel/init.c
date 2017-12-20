@@ -24,4 +24,9 @@ void kernel_init() {
     for (i = 0; i < 64; i++) {
         mm_allocator[i] = 0;
     }
+    
+    // Назначить всем процессам статус N/A
+    for (i = 0; i < PROCESS_MAX; i++) {
+        apps[i].busy = 0;
+    }
 }

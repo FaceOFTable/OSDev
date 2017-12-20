@@ -136,9 +136,12 @@ uint32_t ui_load_bmp(const char* filename) {
                     rsize -= num;                    
                 }
 
+                fclose(fd);
                 return bmp;    
             }
         }
+        
+        fclose(fd);        
     }
     
     return 0;
