@@ -7,9 +7,9 @@
 #include "fs/vfs.c"
 #include "pci/init.c"
 #include "kernel/pic_redirect.c"
-#include "kernel/isr_init.c"
 #include "kernel/pic_keyb.c"
 #include "kernel/app.c"
+#include "kernel/isr_init.c"
 #include "kernel/init.c"
 #include "display/util.c"
 #include "display/vga.c"
@@ -29,9 +29,13 @@ void main() {
     
     ui_start();
     
-    // BIN-это откомпилированная программа
-brk;    
-    app_load_raw("app/desktop.raw");
+    // BIN-это откомпилированная программа    
+    //int app_id = app_load_raw("app/desktop.raw");
+    int app_id = app_load_raw("app/testing.raw");
+    
+    // передача кванта времени приложению
+    app_start(app_id);
+    
     
     sti;
     for(;;);

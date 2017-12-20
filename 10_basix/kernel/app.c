@@ -48,7 +48,7 @@ int app_load_raw(char* filename) {
         
         // Выделение 2-х сегментов
         mm_writed(apps[ app_id ].cr3_map + 4, catalog_code | PT_PRESENT | PT_RW | PT_US);
-        mm_writed(apps[ app_id ].cr3_map + 8, catalog_data | PT_PRESENT | PT_RW | PT_US);        
+        mm_writed(apps[ app_id ].cr3_map + 8, catalog_data | PT_PRESENT | PT_RW | PT_US);
         
         // Ограничение загрузки большого файла
         int fs = fsize(fd);
@@ -66,8 +66,29 @@ int app_load_raw(char* filename) {
             
             fs -= 4096;            
         }
+        
+        // Записать EIP в локальный TSS
+        mm_writed( ((uint32_t)apps[ app_id ].tss) + 0x20, 0x400000 );
+        
+        // Вершина стека сегмента находится в C`00000 (на самом верху)
+        mm_writed( ((uint32_t)apps[ app_id ].tss) + 0x14, 0xC00000 );
+        
     }
     
     fclose(fd);        
     return app_id;
+}
+
+/*
+ * Запуск и выполнение приложения в его квант времени
+ */
+
+void app_start(int app_id) {
+    
+    // Задать исполняемый ID
+    app_id_current = app_id;
+    
+    // Запуск кванта
+    app_exec( (uint32_t)apps[app_id].tss, apps[app_id].cr3_map );
+
 }

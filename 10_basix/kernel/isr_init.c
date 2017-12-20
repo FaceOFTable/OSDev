@@ -1,6 +1,9 @@
 // Ссылки на прерывания
 void interrupt_null();
 void interrupt_keyb();
+void exception_page_fault();
+
+#include "exceptions/page_fault.c"
 
 // 64-х битный дескриптор прерывания
 struct IDT_Item {
@@ -69,5 +72,8 @@ void kernel_isr_init() {
     
     // Назначить вектора прерываний
     kernel_isr_make(0x21, & interrupt_keyb);
+    
+    // Обработчики Exception
+    kernel_isr_make(0x0E, & exception_page_fault);
     
 }

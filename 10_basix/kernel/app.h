@@ -6,6 +6,9 @@
 // Своего рода COM-файл
 #define PROCESS_TYPE_RAW    1
 
+// Запуск приложения с EntryTSS позиции (копирование регистров и флагов)
+void app_exec(uint32_t, uint32_t);
+
 struct PROCESS {
     
     uint8_t     busy;
@@ -14,6 +17,9 @@ struct PROCESS {
     uint8_t     tss[104];           // Здесь все регистры и флаги процесса
     
 };
+
+// Текущий исполняемый ID процесса
+uint32_t app_id_current;
 
 // Процессы
 struct PROCESS apps[ PROCESS_MAX ];

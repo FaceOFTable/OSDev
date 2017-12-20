@@ -102,6 +102,12 @@ static inline uint32_t IoRead32(int16_t port) {
     return data;
 }
 
+static inline void SetCR3(int32_t cr3val) {    
+    
+    __asm__ volatile ("movl %0, %%cr3" : : "r"(cr3val));
+    // __asm__ volatile("movl %1, cr3" : "r" (cr3_value));            
+}
+
 // Важные переменные среды ядра
 // ---------------------------------------------------------------------
 
