@@ -7,6 +7,9 @@ void ui_init() {
     gif_chunks  = 0; // kalloc(512 * 1024);
     gif_surface = 0; // kalloc(512 * 1024);
 
+    display_vga_mode(VGA_640x480);
+    display_vga_cls(1);
+
 }
 
 // Печать HEX-строки
@@ -24,11 +27,11 @@ void ui_hexprint(uint32_t value, int digs, int x, int y, int color) {
 
 }
 
-// Выдача и обработка стартового простого интерфейса
+// Тестовое
 void ui_start() {
 
-    display_vga_mode(VGA_640x480);
-    display_vga_cls(1);
+    
+/*
 
 // ---
     uint32_t u = ui_load_bmp("/walls/forest.bmp");
@@ -72,6 +75,7 @@ void ui_start() {
         }
     }
     // --
+*/
 
 
 /*

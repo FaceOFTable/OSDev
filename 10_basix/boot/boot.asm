@@ -38,17 +38,17 @@ error:  int     18h
 ; ----------------------------------------------------------------------
 exec:   mov     ebp, [si + 8]
         mov     [DAP + 8], ebp
-        call    Read            
-        movzx   edi, word [7E00h + BPB_ResvdSecCnt]     ; Резервированных секторов        
+        call    Read
+        movzx   edi, word [7E00h + BPB_ResvdSecCnt]     ; Резервированных секторов
         add     edi, ebp                                ; Вычислить старт FAT-таблиц
         mov     [start_fat], edi
         mov     eax, [7E00h + BPB_FAT32sz]              ; Начало данных
 @@:     movzx   ebx, byte [7E00h + BPB_NumFATs]
         mul     ebx
         add     edi, eax
-        mov     [start_data], edi        
+        mov     [start_data], edi
         mov     al, [7E00h + BPB_SecInCluster]          ; Количество секторов в кластере
-        mov     byte [CLUSTR + 2], al        
+        mov     byte [CLUSTR + 2], al
         mov     eax, [7E00h + BPB_RootEnt_32]           ; Стартовый кластер на прочтение каталогов
 GoNext: call    ReadCluster                             ; Чтение очередного кластера RootDir в память
         shl     cx, 4                                   ; 1 сектор = 16 записей
@@ -62,7 +62,7 @@ GoNext: call    ReadCluster                             ; Чтение очер�
         jcxz    found
         add     di, 20h
         dec     bp
-        jne     @b        
+        jne     @b
         call    NextCluster
         cmp     eax, 0x0FFFFFF0
         jb      GoNext
@@ -73,7 +73,7 @@ GoNext: call    ReadCluster                             ; Чтение очер�
 
 found:  mov     ax, [di + 14h]          ; Первый кластер
         shl     eax, 16
-        mov     ax, [di + 1Ah]        
+        mov     ax, [di + 1Ah]
 @@:     call    ReadCluster             ; Начать цикл скачивания программы в память
         shl     cx, 5
         add     [CLUSTR + 6], cx        ; Сместить на ClusterSize * 512 байт

@@ -14,6 +14,8 @@ then
 
     mv main.raw ../../disk/app/desktop.raw
     rm *.o
+    
+    cd ../../ && sh make.sh
     echo "OK"
 
 fi

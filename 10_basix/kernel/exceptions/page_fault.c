@@ -6,6 +6,8 @@
 #define PAGE_REQUIRE_USER       0x004
 #define PAGE_REQUIRE_IFETCH     0x010
 
+void ui_handler(uint32_t* stack);
+
 /*
  * Обработчик PAGE EXCEPTION
  * 
@@ -15,8 +17,8 @@
 // address -- запрошенный адрес
 // code_id -- код ошибки с Page Fault
 
-void handler_page_fault(uint32_t address, uint32_t code_id) {
-    
+void handler_page_fault(uint32_t address, uint32_t code_id, uint32_t stack) {
+
     // Вызов из CPL=3
     if (code_id & PAGE_REQUIRE_USER) {
         
@@ -50,11 +52,31 @@ void handler_page_fault(uint32_t address, uint32_t code_id) {
             }
             // Возможны некоторые адреса обращений к системным данным
             else {
+brk;
+                switch (address) {
+                    
+                    /*
+                     * Видеосервис
+                     */
+
+                    case 1: ui_handler((uint32_t*)stack); break;
+                    
+                }
                 
+                // SetCR3( PDBR_ADDRESS );                
+                // --------
+                
+                // --------
+                // SetCR3( apps[ app_id_current ].cr3_map );
+
                 // ..
                 
             }
         }
         // -------------------------------------------------------------      
+        
+    } else {
+        
+        // Ужасный баг...        
     }
 }

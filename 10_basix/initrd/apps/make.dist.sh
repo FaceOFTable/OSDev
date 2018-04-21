@@ -15,6 +15,7 @@ if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x400000 -Td
 then
 
     rm *.o
+    cd ../../ && sh make.sh    
     echo "OK"
 
 fi

@@ -126,8 +126,7 @@ void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
 // Установка определенного видеорежима
 void display_vga_mode(int mode) {
 
-    int i;
-    
+    int i;    
     switch (mode) {
 
         case VGA_640x480:

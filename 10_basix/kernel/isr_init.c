@@ -1,7 +1,9 @@
 // Ссылки на прерывания
 void interrupt_null();
 void interrupt_keyb();
+void service_interrupt_40h();
 void exception_page_fault();
+void exception_GP_fault();
 
 #include "exceptions/page_fault.c"
 
@@ -44,7 +46,10 @@ struct IDT_Item {
 */
 
 // http://wiki.osdev.org/Interrupt_Descriptor_Table#IDT_in_IA-32e_Mode_.2864-bit_IDT.29
-void kernel_isr_make(uint32_t id, void* ptr) {
+// attrb = 8Eh Interrupt
+// attrb = 8Fh Trap
+
+void kernel_isr_make(uint32_t id, void* ptr, uint8_t attrb) {
 
     // Преобразуем указатель в адрес
     uint32_t addr = (uint64_t)ptr;
@@ -57,9 +62,10 @@ void kernel_isr_make(uint32_t id, void* ptr) {
     I[id].hi_addr  = (addr >> 16) & 0xffff;
 
     // Параметры
-    I[id].selector = 0x0010; // Селектор кода
-    I[id].attr     = 0x8E00;
+    I[id].selector = 0x0010;        // Селектор кода
+    I[id].attr     = (attrb << 8);  // Атрибуты, 8E00h
 }
+
 
 // Инициализация Interrupt Service Routines
 void kernel_isr_init() {
@@ -67,13 +73,17 @@ void kernel_isr_init() {
     int i;
     
     for (i = 0; i < 256; i++) {
-        kernel_isr_make(i, & interrupt_null);
+        kernel_isr_make(i, & interrupt_null, 0x8E);
     }
     
     // Назначить вектора прерываний
-    kernel_isr_make(0x21, & interrupt_keyb);
+    kernel_isr_make(0x21, & interrupt_keyb, 0x8E);
+    
+    // Сервисные прерывания :: недоступно для Ring3 пока что
+    kernel_isr_make(0x40, & service_interrupt_40h, 0x8E);
     
     // Обработчики Exception
-    kernel_isr_make(0x0E, & exception_page_fault);
+    kernel_isr_make(0x0E, & exception_page_fault, 0x8E);
+    kernel_isr_make(0x0D, & exception_GP_fault, 0x8E);
     
 }

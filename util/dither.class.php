@@ -9,6 +9,31 @@ class Dithering {
     protected $w;
     protected $h;
     protected $color_plane;
+    
+    protected $colors_num = 16;
+    protected $colors_tbl = 'colors';
+    
+    protected $colors4 = array(
+    
+        // R    G    B
+//        [  0,   0,   0], // 0 Черный
+//        [  0, 255, 255], // 1 Голубой
+//        [255,   0, 255], // 2 Пурпурный
+//        [255, 255, 255], // 3 Белый
+
+        // Эта палитра подходит лучше
+        [  0,   0,   0], // 0 Черный
+        [  0,   0, 255], // 1 Синий
+        [  0, 255,   0], // 2 Желтый 255 255 0
+        [255, 255, 255], // 3 Белый        
+    );
+    
+    protected $colors2 = array(
+    
+        [  0,   0,   0], // 0 Черный
+        [255, 255, 255], // 1 Белый
+    
+    );
 
     // Стандартная цветовая палитра 16 цветов
     protected $colors = array
@@ -30,6 +55,20 @@ class Dithering {
         [255, 255,   0],  // 14
         [255, 255, 255],  // 15
     );
+    
+    public function set4colors() {
+        
+        $this->colors_num = 4;
+        $this->colors_tbl = 'colors4';
+        
+    }
+    
+    public function set2colors() {
+
+        $this->colors_num = 2;
+        $this->colors_tbl = 'colors2';
+        
+    }
 
     /*
      * Найти ближайший color_id
@@ -39,11 +78,12 @@ class Dithering {
     {
         $psort = array();
 
-        for ($k = 0; $k < 16; $k++) {
+        $colors = $this->colors_tbl;
+        for ($k = 0; $k < $this->colors_num; $k++) {
 
-            $dist = pow($r - $this->colors[$k][0], 2) +
-                    pow($g - $this->colors[$k][1], 2) +
-                    pow($b - $this->colors[$k][2], 2);
+            $dist = pow($r - $this->$colors[ $k ][0], 2) +
+                    pow($g - $this->$colors[ $k ][1], 2) +
+                    pow($b - $this->$colors[ $k ][2], 2);
 
             $psort[$k] = $dist;
         }
@@ -62,6 +102,7 @@ class Dithering {
     public function dither_channels($R, $G, $B, $dith = 1)
     {
         $C = array();
+        $colors = $this->colors_tbl;
 
         for ($y = 0; $y < $this->h; $y++) {
 
@@ -75,9 +116,9 @@ class Dithering {
 
                 // Новые цвета
                 list($new_R, $new_G, $new_B) = array(
-                    $this->colors[ $color_id ][0],
-                    $this->colors[ $color_id ][1],
-                    $this->colors[ $color_id ][2]
+                    $this->$colors[ $color_id ][0],
+                    $this->$colors[ $color_id ][1],
+                    $this->$colors[ $color_id ][2]
                 );
 
                 // Записать обратно
@@ -141,9 +182,10 @@ class Dithering {
 
         // Создать новое изображение
         $out = imagecreate($this->w, $this->h);
+        $colors = $this->colors_tbl;
         
-        for ($i = 0; $i < 16; $i++) {
-            imagecolorallocate($out, $this->colors[$i][0], $this->colors[$i][1], $this->colors[$i][2]);
+        for ($i = 0; $i < $this->colors_num; $i++) {
+            imagecolorallocate($out, $this->$colors[$i][0], $this->$colors[$i][1], $this->$colors[$i][2]);
         }
 
         // Разделить на каналы

@@ -8,7 +8,11 @@
 [GLOBAL apic_disable]
 [GLOBAL interrupt_null]
 [GLOBAL interrupt_keyb]
+
 [GLOBAL exception_page_fault]
+[GLOBAL exception_GP_fault]
+
+[GLOBAL service_interrupt_40h]
 [GLOBAL app_exec]
 
 ; ----------------------------------------------------------------------
@@ -65,6 +69,9 @@ app_exec:
 
         ; flags : cs : eip
         pushfd
+        pop     eax
+        or      ax, 200h            ; IF=1
+        push    eax        
         push    38h + 3
         push    dword [ebp + 4]
 
@@ -108,11 +115,38 @@ exception_page_fault:
 
         mov     eax, cr2
         mov     ebp, esp
-        push    dword [ebp + 8*4]
-        push    eax
+        
+        push    ebp                     ; stack
+        push    dword [ebp + 8*4]       ; code_id
+        push    eax                     ; address
+        
         call    handler_page_fault
         mov     esp, ebp
 
         popad
         add     esp, 4
         iret
+
+; ----------------------------------------------------------------------
+; Обработчик 0D General Protection
+
+exception_GP_fault:
+
+        xchg    bx, bx
+        
+        ; !!
+        iret
+
+; ----------------------------------------------------------------------
+; Обработчик сервисного прерывания INT 40h
+
+service_interrupt_40h:
+
+        xchg bx, bx
+        pushad
+        
+
+
+        popad
+        ret
+
