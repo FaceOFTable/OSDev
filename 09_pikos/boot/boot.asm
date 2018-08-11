@@ -10,10 +10,10 @@
         mov     ss, ax
         mov     ds, ax
         mov     sp, 7C00h
-        
+
         ; Номер диска
         mov     [0000h], dl
-                
+
         ; Вызов на INT 13h, проверка на поддержку режима DAP
         mov     ah, 41h
         mov     bx, 55AAh
