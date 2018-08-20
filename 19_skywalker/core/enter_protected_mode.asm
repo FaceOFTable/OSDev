@@ -7,7 +7,7 @@
         cld        
         
         ; Количество сегментов
-        mov     word  [GLOBAL_DESCRIPTOR_TABLE.gdt + 0], (4*8) - 1                
+        mov     word  [GLOBAL_DESCRIPTOR_TABLE.gdt + 0], (5*8) - 1                
         
         ; Начало GDT, линейный адрес
         mov     dword [GLOBAL_DESCRIPTOR_TABLE.gdt + 2], GLOBAL_DESCRIPTOR_TABLE  
@@ -66,6 +66,15 @@ GLOBAL_DESCRIPTOR_TABLE:
         db 80h + 9             ; 32-битный свободный TSS, P=1
         db 40h                 ; DPL=0, G=0, D=1 (32 битный)
         db 0 
+        
+.code16: ; 20h Сегмент 16-битного кода
+   
+        dw 0xffff              ; limit[15..0]
+        dw 0                   ; addr[15..0]
+        db 0                   ; addr[23..16]        
+        db 80h + (10h + 8)     ; тип=8 (код для чтения) + 10h (s=1) + 80h (p=1), dpl = 0
+        db 80h + 0xF           ; limit[23..16]=0x0f, G=1, D=0
+        db 0                   ; addr[31..24]
 
 .gdt:   dw 0,0,0               ; Указатель на GDT 
 .idt:   dw 0,0,0               ; Указатель на IDT
