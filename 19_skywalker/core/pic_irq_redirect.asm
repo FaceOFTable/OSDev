@@ -99,7 +99,7 @@ pic_irq_redirect:
 
 ; Инициализация RTC-таймера
 ; ------------------------------------------------------
-pic_irq_redirect_set_timer:
+pic_irq_set_timer:
 
         mov     al, 0x34
         out     0x43, al
