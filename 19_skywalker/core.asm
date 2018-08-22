@@ -48,6 +48,7 @@ real_mode_entry:
 
         include "core/pic_irq_redirect.asm"
         include "core/interrupts.asm"
+        include "core/paging.asm"
 
         ; --------------------------------------
         ; Выход из процедуры RM в PM
@@ -74,6 +75,8 @@ protected_mode_entry:
         mov     ax, $18
         mov     esp, $8000
         ltr     ax
+        
+        ; -- сохранить старую таблицу прерываний bios и bda
 
         ;mov     bx, 1110111111111000b
         mov     bx, 1111111111111111b ; PS/2, Keyb, Timer, IRQ#2
@@ -82,9 +85,11 @@ protected_mode_entry:
         call    make_interrupt_list
         
         brk
-        int     1
-
+        call    paging_make
+        
         ; jmp     $0020 : prot_mode_transit
 
         jmp     $
 
+; ----------------------------------------------------------------------
+        include "core/sys_undefined_data.asm"

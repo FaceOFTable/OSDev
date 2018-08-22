@@ -2,7 +2,7 @@
 ; IVT Offset | INT #     | Description
 ; -----------+-----------+-----------------------------------
 ; 0x0000     | 0x00      | Divide by 0
-; 0x0004     | 0x01      | Trace 
+; 0x0004     | 0x01      | Trace
 ; 0x0008     | 0x02      | NMI Interrupt
 ; 0x000C     | 0x03      | Breakpoint (INT3)
 ; 0x0010     | 0x04      | Overflow (INTO)
@@ -43,7 +43,7 @@ macro eoi_slave {
 
 ; ----------------------------------------------------------------------
 ; Создание списка прерываний
-; ----------------------------------------------------------------------        
+; ----------------------------------------------------------------------
 
 make_interrupt_list:
 
@@ -71,7 +71,7 @@ make_interrupt_list:
         call    make_interrupt
         loop    @b
         ret
-        
+
 ; ----------------------------------------------------------------------
 ; Создание дескриптора (адрес eax), bx - селектор, edi - куда
 ; ----------------------------------------------------------------------
@@ -79,13 +79,13 @@ make_interrupt_list:
 make_interrupt:
 
         push    eax ecx
-        stosw   ; addr0..15   
-        
-        xchg    ax, bx    
-        stosw   ; selector        
+        stosw   ; addr0..15
+
+        xchg    ax, bx
+        stosw   ; selector
         xchg    ax, bx
 
-        mov     ax, 0x8E00 ; => Present, 0x0E0 System | gate interrupt         
+        mov     ax, 0x8E00 ; => Present, 0x0E0 System | gate interrupt
         stosw   ; configs
 
         shr     eax, 16
@@ -99,14 +99,26 @@ make_interrupt:
 
 interrupts_list:
 
-        dd INTERRUPT_00_DE
+        dd INTERRUPT_00_DE      
         dd INTERRUPT_01_DB
         dd INTERRUPT_02_NMI
         dd INTERRUPT_03_BP
-        dd INTERRUPT_04_OF, INTERRUPT_05_BR,  INTERRUPT_06_UD,  INTERRUPT_07_NM
-        dd INTERRUPT_08_DF, INTERRUPT_09_FPU, INTERRUPT_0A_TS,  INTERRUPT_0B_NP
-        dd INTERRUPT_0C_SS, INTERRUPT_0D_GP,  INTERRUPT_0E_PF,  INTERRUPT_0F
-        dd INTERRUPT_10_MF, INTERRUPT_11_AC,  INTERRUPT_12_MC,  INTERRUPT_13_XF
+        dd INTERRUPT_04_OF
+        dd INTERRUPT_05_BR
+        dd INTERRUPT_06_UD
+        dd INTERRUPT_07_NM
+        dd INTERRUPT_08_DF
+        dd INTERRUPT_09_FPU
+        dd INTERRUPT_0A_TS
+        dd INTERRUPT_0B_NP
+        dd INTERRUPT_0C_SS
+        dd INTERRUPT_0D_GP
+        dd INTERRUPT_0E_PF
+        dd INTERRUPT_0F
+        dd INTERRUPT_10_MF
+        dd INTERRUPT_11_AC
+        dd INTERRUPT_12_MC
+        dd INTERRUPT_13_XF
         dd INTERRUPT_14_VE
 
 ; ----------------------------------------------------------------------
@@ -114,15 +126,15 @@ interrupts_list:
 ; ----------------------------------------------------------------------
 
 irq_list:
-        
-        dd irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7           
+
+        dd irq0, irq1, irq2, irq3, irq4, irq5, irq6, irq7
         dd irq8, irq9, irqA, irqB, irqC, irqD, irqE, irqF
 
 ; --------------------------------------------------------------------
 ; СИСТЕМНЫЕ ПРЕРЫВАНИЯ
 ; --------------------------------------------------------------------
 
-INTERRUPT_00_DE: 
+INTERRUPT_00_DE:
 
         iret
 
@@ -161,7 +173,7 @@ INTERRUPT_08_DF: ; Error_Code
 
 INTERRUPT_09_FPU:
 
-        iret    
+        iret
 
 INTERRUPT_0A_TS:
 
@@ -186,7 +198,7 @@ INTERRUPT_0D_GP:
         jmp $
 
 ; Page fault
-INTERRUPT_0E_PF: 
+INTERRUPT_0E_PF:
 
         pop     eax
         iret
@@ -207,27 +219,27 @@ INTERRUPT_12_MC:
 
         iret
 
-INTERRUPT_13_XF:        
+INTERRUPT_13_XF:
 
         iret
 
 ; Virtualization INTERRUPT_exception
-INTERRUPT_14_VE: 
+INTERRUPT_14_VE:
 
         iret
- 
+
 ; --------------------------------------------------------------------------------------
 
 ; Просто заглушка
-INTERRUPT_NULL:    
-    
+INTERRUPT_NULL:
+
         brk
         iret
 
 ; ТАЙМЕР 100 Гц
 ; --------------------------------------------------------------------------------------
-irq0:   pusha        
-        ; call timer_tick        
+irq0:   pusha
+        ; call timer_tick
         eoi_master
         popa
         iret
@@ -241,19 +253,19 @@ irq1:   pusha
         iret
 
 ; --------------------------------------------------------------------------------------
-irq2:   pusha        
+irq2:   pusha
         eoi_master
         popa
         iret
 
 ; --------------------------------------------------------------------------------------
-irq3:   pusha        
+irq3:   pusha
         eoi_master
         popa
         iret
 
 ; --------------------------------------------------------------------------------------
-irq4:   pusha        
+irq4:   pusha
         eoi_master
         popa
         iret
@@ -278,8 +290,8 @@ irq7:   pusha
 
 ; --------------------------------------------------------------------------------------
 irq8:   pusha
-        eoi_slave   
-        popa     
+        eoi_slave
+        popa
         iret
 
 ; --------------------------------------------------------------------------------------
