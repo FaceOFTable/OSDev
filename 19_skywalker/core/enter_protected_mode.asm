@@ -5,7 +5,7 @@
         
         cli
         cld        
-        
+
         ; Количество сегментов
         mov     word  [GLOBAL_DESCRIPTOR_TABLE.gdt + 0], (5*8) - 1                
         
@@ -16,7 +16,7 @@
         lgdt    [GLOBAL_DESCRIPTOR_TABLE.gdt]
 
         ; Количество элементов в IDT (256) 8*256-1 = 2047
-        mov     word  [GLOBAL_DESCRIPTOR_TABLE.idt + 0], 0x7FF         
+        mov     word  [GLOBAL_DESCRIPTOR_TABLE.idt + 0], 0x7FF
         
         ; Начало IDT, линейный адрес
         mov     dword [GLOBAL_DESCRIPTOR_TABLE.idt + 2], 0             

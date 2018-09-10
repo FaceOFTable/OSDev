@@ -12,7 +12,7 @@ paging_make:
         mov     ecx, 2 * 1024
         xor     eax, eax
         rep     stosd
-        
+
         ; Установка ссылки на первый каталог 4 Мб
         mov     [GENERAL_PDBR], dword (GENERAL_CATALOG + 3)
         

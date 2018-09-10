@@ -68,6 +68,7 @@ pic_irq_redirect:
 
         ; Отключение APIC:
         ; Сбрасываем 11-й бит в MSR 1Bh (APIC=0)
+
         mov         ecx, 0x1B
         rdmsr
         and         eax, 0xfffff7ff 
@@ -97,7 +98,7 @@ pic_irq_redirect:
         
         ret
 
-; Инициализация RTC-таймера
+; Инициализация RTC-таймера 100 Hz
 ; ------------------------------------------------------
 pic_irq_set_timer:
 
