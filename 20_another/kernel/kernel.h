@@ -1,4 +1,13 @@
 #define brk __asm__ __volatile__("xchg %bx, %bx");
+#define sti __asm__ __volatile__("sti");
+#define cli __asm__ __volatile__("cli");
+
+// Объявления
+// ---------------------------------------------------------------------
+void apic_disable();            // Отключить LAPIC
+void INT_null();                // Заглушка INT
+void IRQ_keyboard();
+void IRQ_cascade();
 
 // Некоторые константы
 // ---------------------------------------------------------------------
@@ -21,6 +30,15 @@
 #define int64_t     long long
 #define uint64_t    unsigned long long
 
+// 64-х битный дескриптор прерывания
+struct IDT_Item {
+
+    uint16_t low_addr;
+    uint16_t selector;
+    uint16_t attr;
+    uint16_t hi_addr;
+};
+
 // Адреса PIC 8086/88
 // ---------------------------------------------------------------------
 
@@ -40,15 +58,18 @@
 #define ICW1_INTERVAL4   0x04  /* Call address interval 4 (8) */
 #define ICW1_LEVEL       0x08  /* Level triggered (edge) mode */
 #define ICW1_INIT        0x10  /* Initialization - required! */
- 
+
 #define ICW4_8086        0x01  /* 8086/88 (MCS-80/85) mode */
 #define ICW4_AUTO        0x02  /* Auto (normal) EOI */
 #define ICW4_BUF_SLAVE   0x08  /* Buffered mode/slave */
 #define ICW4_BUF_MASTER  0x0C  /* Buffered mode/master */
 #define ICW4_SFNM        0x10  /* Special fully nested (not) */
 
-// Отключить LAPIC
-void apic_disable();
+// Маски
+#define IRQ_TIMER        (1 << 0)
+#define IRQ_KEYB         (1 << 1)
+#define IRQ_CASCADE      (1 << 2)
+#define IRQ_PS2MOUSE     (1 << 12)
 
 // Процедура необходимой задержки для корректной работы прерываний
 #define IoWait asm volatile("jecxz 1f" "\n\t" "1:jecxz 2f" "\n\t" "2:");
@@ -56,37 +77,39 @@ void apic_disable();
 // Писать в (port) данные data
 // ---------------------------------------------------------------------
 
-static inline void IoWrite8(int16_t port, int8_t data) {    
+static inline void IoWrite8(int16_t port, int8_t data) {
     __asm__ volatile("outb %b0, %w1" : : "a" (data), "Nd" (port));
 }
 
-static inline void IoWrite16(int16_t port, int16_t data) {    
+static inline void IoWrite16(int16_t port, int16_t data) {
     __asm__ volatile("outw %w0, %w1" : : "a" (data), "Nd" (port));
 }
 
-static inline void IoWrite32(int16_t port, int32_t data) {    
+static inline void IoWrite32(int16_t port, int32_t data) {
     __asm__ volatile("outl %0, %w1" : : "a" (data), "Nd" (port));
 }
 
 // Читать данные из порта (port)
 // ---------------------------------------------------------------------
 static inline uint8_t IoRead8(int16_t port) {
-    
-    uint8_t data;        
-    __asm__ volatile("inb %1, %0" : "=a" (data) :"Nd" (port));         
+
+    uint8_t data;
+    __asm__ volatile("inb %1, %0" : "=a" (data) :"Nd" (port));
     return data;
 }
 
 static inline uint16_t IoRead16(int16_t port) {
-    
-    uint16_t data;    
-    __asm__ volatile("inw %1, %0" : "=a" (data) : "Nd" (port));        
+
+    uint16_t data;
+    __asm__ volatile("inw %1, %0" : "=a" (data) : "Nd" (port));
     return data;
 }
 
 static inline uint32_t IoRead32(int16_t port) {
-    
-    uint32_t data;    
-    __asm__ volatile("inl %1, %0" : "=a" (data) : "Nd" (port));        
+
+    uint32_t data;
+    __asm__ volatile("inl %1, %0" : "=a" (data) : "Nd" (port));
     return data;
 }
+
+// ---------------------------------------------------------------------

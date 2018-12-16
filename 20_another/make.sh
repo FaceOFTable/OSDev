@@ -1,15 +1,15 @@
 #!/bin/sh
 
 # Для kernel.c
-if (nasm -felf32 -o startup.o nasm/startup.asm)
+if (nasm -felf32 -o startup.o startup.asm)
 then
 
 # Компиляция ядра
 if (clang -Os -ffreestanding -m32 -msse -msse2 -c -o kernel.o kernel.c)
 then
 
-# Выгрузка бинарного файла
-if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x100000 -Tdata=0x280000 startup.o kernel.o -o kernel.c.bin)
+# Выгрузка бинарного файла :: код располагается в $100000, данные в $0x200000
+if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x100000 -Tdata=0x200000 startup.o kernel.o -o kernel.c.bin)
 then
 
 # Собрать Loader -- главный загрузчик
