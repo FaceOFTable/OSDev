@@ -6,11 +6,11 @@
 #include "kernel/gui.c"
 #include "kernel/keyboard.c"
 
+struct window win1, win2;
+
 void main() {
 
     irq_init(IRQ_KEYB);
-
-    struct window win1, win2;
 
     // Создаем окно
     window_init(& win1, 16, 16, 320, 240, "Windows рулит всегда и везде");
