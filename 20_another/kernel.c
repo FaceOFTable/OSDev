@@ -11,13 +11,13 @@ struct window win1, win2;
 void main() {
 
     irq_init(IRQ_KEYB);
+    
+    vga_init();
+    vga_cls(3);
 
     // Создаем окно
     window_init(& win1, 16, 16, 320, 240, "Windows рулит всегда и везде");
     window_init(& win2, 150, 300, 320, 140, "Второе окно тоже кульное");
-
-    vga_mode(VGA_640x480);
-    vga_cls(3);
 
     window_repaint(& win1, 1);
     window_repaint(& win2, 0);

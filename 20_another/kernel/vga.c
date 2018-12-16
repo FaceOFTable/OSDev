@@ -132,6 +132,23 @@ void vga_pixel(unsigned x, unsigned y, unsigned char c) {
     }
 }
 
+// Инициализация после INT 10h
+void vga_init() {
+    
+    int i;
+    
+    // Режим 2 (регистр выбор режима 5)
+    // -- режим записи 1 слой цвета - 1 бит
+    for (i = 0; i < 16; i++) {
+        IoWrite8(VGA_DAC_WRITE_INDEX, i);
+        IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 0] >> 2);
+        IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 1] >> 2);
+        IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 2] >> 2);
+    }
+
+    IoWrite16(VGA_GC_INDEX, 0x0205);
+}
+
 // Установка определенного видеорежима
 void vga_mode(int mode) {
 
@@ -143,16 +160,6 @@ void vga_mode(int mode) {
             // -- todo палитру
             vga_write_regs( (unsigned char*)disp_vga_640x480x16 );
 
-            // Режим 2 (регистр выбор режима 5)
-            // -- режим записи 1 слой цвета - 1 бит
-            for (i = 0; i < 16; i++) {
-                IoWrite8(VGA_DAC_WRITE_INDEX, i);
-                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 0] >> 2);
-                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 1] >> 2);
-                IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 2] >> 2);
-            }
-        
-            IoWrite16(VGA_GC_INDEX, 0x0205);
             break;
 
         case VGA_320x200:
@@ -165,23 +172,17 @@ void vga_mode(int mode) {
     disp_vga_lastmode = mode;
 }
 
+
 // Быстрая очистка экрана
 void vga_cls(int color) {
 
     int i;
     char* vaddr = (char*)0xA0000;
-
-    switch (disp_vga_lastmode) {
-
-        case VGA_640x480:
-
-            IoWrite16(VGA_GC_INDEX, 0xFF08);
-            for (i = 0; i < 80*480; i++) {
-                volatile uint8_t t = vaddr[ i ];
-                vaddr[ i ] = color;
-            }
-
-            break;
+    
+    IoWrite16(VGA_GC_INDEX, 0xFF08);
+    for (i = 0; i < 80*480; i++) {
+        volatile uint8_t t = vaddr[ i ];
+        vaddr[ i ] = color;
     }
 }
 
@@ -247,10 +248,10 @@ void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 void vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
     int i, j, x;
-    
-    if (y1 > 479 && y2 > 479) 
+
+    if (y1 > 479 && y2 > 479)
         return;
-        
+
     if (y1 > 479) y1 = 479;
     if (y2 > 479) y2 = 479;
 
