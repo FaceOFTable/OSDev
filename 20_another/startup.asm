@@ -11,8 +11,12 @@
 [GLOBAL IRQ_cascade]
 
 ; ----------------------------------------------------------------------
-_start:
+_start: 
 
+        ;jmp _start    
+        ;mov [0xb8000], word 0x1741
+        ;jmp _start        
+        
         mov     esp, 0xA0000
         jmp     main
 
@@ -20,9 +24,9 @@ _start:
 ; ----------------------------------------------------------------------
 apic_disable:
 
-        mov ecx, 0x1b
+        mov     ecx, 0x1b
         rdmsr
-        and eax, 0xfffff7ff
+        and     eax, 0xfffff7ff
         wrmsr
         ret
 

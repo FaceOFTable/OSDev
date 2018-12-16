@@ -1,14 +1,17 @@
 
         org     8000h
         macro   brk {  xchg    bx, bx }
- 
+         
         ; Переход в графический режим сразу же
-        mov     ax, 0012h
-        int     10h
+        mov     ax, 0012h        
+        int     10h            
                 
         ; Загрузка регистра GDT/IDT
         lgdt    [GDTR]      
         lidt    [IDTR] 
+
+        cli
+        cld
 
         ; Вход в Protected Mode
         mov     eax, cr0
@@ -47,11 +50,13 @@ pm:     mov     ax, 8
 
         ; Скопировать ядро в память
         mov     esi, os
-        mov     edi, 100000h
+        mov     edi, 50000h
         mov     ecx, len
         rep     movsb
-        jmp     100000h
-        
+
+        ; Придется грузить сюда из-за vbox
+        jmp     10h : 50000h
+
 os:     file    "kernel.c.bin"
 len =   $ - os
         

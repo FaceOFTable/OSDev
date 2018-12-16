@@ -172,7 +172,6 @@ void vga_mode(int mode) {
     disp_vga_lastmode = mode;
 }
 
-
 // Быстрая очистка экрана
 void vga_cls(int color) {
 
