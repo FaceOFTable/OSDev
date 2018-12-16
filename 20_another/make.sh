@@ -4,8 +4,8 @@
 if (nasm -felf32 -o startup.o startup.asm)
 then
 
-# Компиляция ядра
-if (clang -Os -ffreestanding -m32 -msse -msse2 -c -o kernel.o kernel.c)
+# Компиляция ядра -msse -msse2
+if (clang -Os -ffreestanding -m32 -march=i386 -mno-sse -c -o kernel.o kernel.c)
 then
 
 # Выгрузка бинарного файла :: код располагается в $100000, данные в $0x200000

@@ -1,5 +1,13 @@
 #include "vga.h"
 
+// Расчет дистанции (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
+uint32_t color_distance(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2) {
+
+    return (r1 - r2) * (r1 - r2) +
+           (g1 - g2) * (g1 - g2) +
+           (b1 - b2) * (b1 - b2);
+}
+
 // Чтение регистров с текущего видеорежима
 void vga_read_regs(unsigned char *regs) {
 
@@ -224,14 +232,6 @@ void vga_putf8(int x, int y, char* string, char color) {
 
 }
 
-// Расчет дистанции (r1 - r2)^2 + (g1 - g2)^2 + (b1 - b2)^2
-uint32_t color_distance(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2) {
-
-    return (r1 - r2) * (r1 - r2) +
-           (g1 - g2) * (g1 - g2) +
-           (b1 - b2) * (b1 - b2);
-}
-
 // 50% полупрозрачный блок сплошного цвета
 void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
@@ -247,6 +247,12 @@ void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 void vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
     int i, j, x;
+    
+    if (y1 > 479 && y2 > 479) 
+        return;
+        
+    if (y1 > 479) y1 = 479;
+    if (y2 > 479) y2 = 479;
 
     int x1i = x1 >> 3;
     int x2i = x2 >> 3;
@@ -274,7 +280,7 @@ void vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
         IoWrite16(VGA_GC_INDEX, (xl & xr) | 0x08);
         for (i = y1; i <= y2; i++) { char* vm = (char*)(0xA0000 + 80*i); volatile char t = vm[x1i]; vm[x1i] = color; }
     }
-    
+
     // Левая и правая часть
     else {
 
