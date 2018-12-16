@@ -4,14 +4,14 @@
 #include "kernel/vga.c"
 #include "kernel/keyboard.c"
 
-#include "ui/start.c"
-
 void main() {
 
     irq_init(IRQ_KEYB);
     
-    ui_start();
-
+    vga_mode(VGA_640x480);
+    vga_cls(1);    
+    vga_putf8(0,0,"Привет, UTF8",15);
+    
     sti;
 
     for(;;);

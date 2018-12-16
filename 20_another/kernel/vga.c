@@ -1,7 +1,7 @@
 #include "vga.h"
 
 // Чтение регистров с текущего видеорежима
-void display_vga_read_regs(unsigned char *regs) {
+void vga_read_regs(unsigned char *regs) {
 
 	unsigned i;
 
@@ -48,7 +48,7 @@ void display_vga_read_regs(unsigned char *regs) {
 }
 
 // Запись регистров в VGA-контроллер
-void display_vga_write_regs(unsigned char *regs) {
+void vga_write_regs(unsigned char *regs) {
 
     unsigned i;
 
@@ -105,7 +105,7 @@ void display_vga_write_regs(unsigned char *regs) {
 }
 
 // Писать пиксель
-void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
+void vga_pixel(unsigned x, unsigned y, unsigned char c) {
 
     char* vaddr = (char*)0xA0000;
 
@@ -124,7 +124,7 @@ void display_vga_pixel(unsigned x, unsigned y, unsigned char c) {
 }
 
 // Установка определенного видеорежима
-void display_vga_mode(int mode) {
+void vga_mode(int mode) {
 
     int i;
     switch (mode) {
@@ -132,7 +132,7 @@ void display_vga_mode(int mode) {
         case VGA_640x480:
 
             // -- todo палитру
-            display_vga_write_regs( (unsigned char*)disp_vga_640x480x16 );
+            vga_write_regs( (unsigned char*)disp_vga_640x480x16 );
 
             // Режим 2 (регистр выбор режима 5)
             // -- режим записи 1 слой цвета - 1 бит
@@ -149,7 +149,7 @@ void display_vga_mode(int mode) {
         case VGA_320x200:
 
             // -- todo палитру
-            display_vga_write_regs( (unsigned char*)disp_vga_320x200x256 );
+            vga_write_regs( (unsigned char*)disp_vga_320x200x256 );
             break;
     }
 
@@ -157,13 +157,12 @@ void display_vga_mode(int mode) {
 }
 
 // Быстрая очистка экрана
-void display_vga_cls(int color) {
+void vga_cls(int color) {
 
     int i;
     char* vaddr = (char*)0xA0000;
 
     switch (disp_vga_lastmode) {
-
 
         case VGA_640x480:
 
@@ -175,24 +174,23 @@ void display_vga_cls(int color) {
 
             break;
     }
-
 }
 
 // Печать символа на экране
-void display_vga_pchar(int x, int y, unsigned char c, char color) {
+void vga_pchar(int x, int y, unsigned char c, char color) {
 
     int i, j, f = c * 16;
 
     for (i = 0; i < 16; i++) {
         for (j = 0; j < 8; j++) {
             if (disp_vga_8x16_font[ f + i] & (1 << (7 - j)))
-                display_vga_pixel(x + j, y + i, color);
+                vga_pixel(x + j, y + i, color);
         }
     }
 }
 
 // Печать строки UTF-8
-void display_vga_putf8(int x, int y, char* string, char color) {
+void vga_putf8(int x, int y, char* string, char color) {
 
     while(*string) {
 
@@ -217,7 +215,7 @@ void display_vga_putf8(int x, int y, char* string, char color) {
         }
 
         // Псевдографика недоступна
-        display_vga_pchar(8*x, 16*y, chr, color);
+        vga_pchar(8*x, 16*y, chr, color);
 
         x += 1;
         string++;
@@ -234,23 +232,23 @@ uint32_t color_distance(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t 
 }
 
 // 50% полупрозрачный блок сплошного цвета
-void display_vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
+void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
     int i, j;
     for (i = y1; i <= y2; i++) {
         for (j = x1 + i%2; j <= x2; j += 2) {
-            display_vga_pixel(j, i, color);
+            vga_pixel(j, i, color);
         }
     }
 }
 
 // Блок сплошного цвета
-void display_vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
+void vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
     int i, j;
     for (i = y1; i <= y2; i++) {
         for (j = x1; j <= x2; j++) {
-            display_vga_pixel(j, i, color);
+            vga_pixel(j, i, color);
         }
     }
 }
@@ -260,7 +258,7 @@ void display_vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
  */
 
 // Рисование блока (фонового), начиная с [x,y] позиции
-void bgblock(int x, int y, int length, char bgcolor) {
+void text_bgblock(int x, int y, int length, char bgcolor) {
 
     int i;
     char* addr = DISPLAY_TEXT_ADDR + (x + y*80) * 2;
@@ -271,7 +269,7 @@ void bgblock(int x, int y, int length, char bgcolor) {
 }
 
 // Рисование фрейма
-void draw_frame(int x1, int y1, int x2, int y2) {
+void text_frame(int x1, int y1, int x2, int y2) {
 
     int i;
     char* addr = DISPLAY_TEXT_ADDR;
@@ -296,7 +294,7 @@ void draw_frame(int x1, int y1, int x2, int y2) {
 }
 
 // Печать строки
-void print_text(int x1, int y1, char* string) {
+void text_print(int x1, int y1, char* string) {
 
     char* addr = DISPLAY_TEXT_ADDR + 2*(x1 + y1*80);
 
@@ -310,7 +308,7 @@ void print_text(int x1, int y1, char* string) {
 }
 
 // Положение курсора
-void set_cursor(int x, int y) {
+void text_set_cursor(int x, int y) {
 
 	uint16_t pos = y * 80 + x;
 
@@ -321,7 +319,7 @@ void set_cursor(int x, int y) {
 }
 
 // Режим курсора
-void set_cursor_mode(uint8_t cursor_start, uint8_t cursor_end) {
+void text_cursor_mode(uint8_t cursor_start, uint8_t cursor_end) {
 
 	IoWrite8(0x3D4, 0x0A);
 	IoWrite8(0x3D5, (IoRead8(0x3D5) & 0xC0) | cursor_start);
