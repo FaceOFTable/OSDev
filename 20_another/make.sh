@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# создать диск для vbox
+# VBoxManage convertfromraw --format VDI disk.img disk.vdi
+
 # Для kernel.c
 if (nasm -felf32 -o startup.o startup.asm)
 then
@@ -20,9 +23,12 @@ then
 if (mv loader.bin disk/coreboot.bin)
 then
 
+    # Повтор для floppy-диска
+    cp disk/coreboot.bin floppy/coreboot.bin
+
     rm *.o
     rm kernel.c.bin    
-    bochs -f c.bxrc -q
+    bochs -f c.bxrc -q >> /dev/null 2>&1
 
 fi
 fi

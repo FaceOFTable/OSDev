@@ -151,7 +151,7 @@ void vga_mode(int mode) {
                 IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 1] >> 2);
                 IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 2] >> 2);
             }
-
+        
             IoWrite16(VGA_GC_INDEX, 0x0205);
             break;
 
