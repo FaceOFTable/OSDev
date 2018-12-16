@@ -6,27 +6,26 @@
 #include "kernel/gui.c"
 #include "kernel/keyboard.c"
 
-struct window win1, win2;
-
 void main() {
 
     irq_init(IRQ_KEYB);
     
     vga_init();
     vga_cls(3);
-
-    // Создаем окно
-    window_init(& win1, 16, 16, 320, 240, "Windows рулит всегда и везде");
-    window_init(& win2, 150, 300, 320, 140, "Второе окно тоже кульное");
-
-    window_repaint(& win1, 1);
-    window_repaint(& win2, 0);
+    gui_init();
+    
+    // Создать 2 окна
+    int win1 = window_create(16, 16, 320, 240, "Windows рулит всегда и везде");
+    int win2 = window_create(150, 300, 320, 140, "Второе окно тоже кульное");    
+    
+    // Активировать их
+    window_activate(win1);
+    
+    // Перерисовать оба
+    window_repaint(win1);
+    window_repaint(win2);
+    
     panel_repaint();
-
-    vga_putf8(22, 40, "Необходимо срочно же откинуться на", 0);
-    vga_putf8(22, 52, "спинку кресла и начать созерцать ОС", 0);
-
-    sti;
-
-    for(;;);
+    
+    sti; for(;;);
 }

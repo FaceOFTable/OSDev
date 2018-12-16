@@ -198,8 +198,10 @@ void vga_pchar(int x, int y, unsigned char c, char color) {
     }
 }
 
-// Печать строки UTF-8
-void vga_putf8(int x, int y, char* string, char color) {
+// Печать строки UTF-8 (maxsymb -- максимум символов)
+int vga_putf8(int x, int y, char* string, char color, int maxsymb) {
+
+    int num = 0;
 
     while(*string) {
 
@@ -228,8 +230,14 @@ void vga_putf8(int x, int y, char* string, char color) {
 
         x += 8;
         string++;
+        num++;
+        
+        if (maxsymb && num >= maxsymb) {
+            return 0;
+        }
     }
-
+    
+    return num;
 }
 
 // 50% полупрозрачный блок сплошного цвета
