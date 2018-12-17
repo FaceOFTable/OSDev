@@ -1,7 +1,6 @@
 
 #include "gui.h"
 
-
 // Инициализировать окно id=[1..n]
 void window_init(int id, int x, int y, int w, int h, char* title) {
 
@@ -15,6 +14,7 @@ void window_init(int id, int x, int y, int w, int h, char* title) {
     win->w = w;
     win->h = h;
     win->title = title;
+    win->bgcolor = 7;
 }
 
 // Создать окно в системе
@@ -30,7 +30,7 @@ int window_create(int x, int y, int w, int h, char* title) {
             allwin[id].in_use = 1;
             allwin[id].active = 0;
 
-            window_init(id, x, y, w, h, title);
+            window_init(id, x-2, y-2, w+4, h+4, title);
             return id;
         }
     }
@@ -42,7 +42,7 @@ int window_create(int x, int y, int w, int h, char* title) {
 void window_repaint(int id) {
 
     struct window* win = & allwin[ id ];
-
+    
     // Подложка
     block(win->x1+1, win->y1+1, win->x2-1, win->y2-1, 7);
 
@@ -58,7 +58,12 @@ void window_repaint(int id) {
 
     // Заголовок
     block(win->x1+2, win->y1+2, win->x2-2, win->y1+21, win->active ? 1 : 8);
-    print_utf8(win->x1+6, win->y1+4, win->title, 15, -1, 0);
+    
+    cursor.x = win->x1+6; cursor.y = win->y1+5; cursor.frcolor = 11; cursor.bgcolor = -1;
+    print("\x04");
+    
+    cursor.x = win->x1+6+12; cursor.frcolor = 15;
+    print(win->title);
 }
 
 // Активировать новое окно
@@ -111,6 +116,8 @@ void button(int x1, int y1, int w, int h, int pressed) {
 void panel_repaint() {
 
     int t = 454, id, num = 0;
+    
+    cursor_color(0, -1);
 
     block(0, t,   639, t,   0);
     block(0, t+1, 639, t+1, 15);
@@ -122,11 +129,15 @@ void panel_repaint() {
     // Лого
     block(6, 461, 11, 466, 4); block(13, 461, 18, 466, 2);
     block(6, 468, 11, 473, 1); block(13, 468, 18, 473, 6);
-    print_utf8(3 + 20, 459 + 1, "Запуск", 0, -1, 0);
+    print_xy("Запуск", 3 + 20, 459 + 1);
 
     // Вертикальная полоса-разделитель
     block(78, 458, 78, 477, 8);
     block(79, 458, 79, 477, 15);
+    
+    // Параметры вывода
+    cursor_color(0, -1);
+    cursor.max_chars = 13;
 
     // Отрисовать текущие окна
     for (id = 1; id < WINDOW_MAX; id++) {
@@ -140,12 +151,14 @@ void panel_repaint() {
             button(x, 458, 125, 19, allwin[id].active);
 
             // Написать текст (макс 13 символов)
-            int n = print_utf8(x + 4, y, allwin[id].title, 0, -1, 13);
+            int n = print_xy(allwin[id].title, x + 4, y);
 
             // Если превышение, то дорисовать ..
-            if (n == 0) print_utf8(x + 4 + 13*8, y, "..", 0, -1, 0);
+            if (n == 0) print_xy("..", x + 4 + 13*8, y);
 
             num++;
         }
     }
+    
+    cursor.max_chars = 0;
 }

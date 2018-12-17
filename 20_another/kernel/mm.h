@@ -4,16 +4,10 @@
 
 uint32_t mem_max;       // Максимальное кол-во памяти в системе
 uint32_t mem_lower;     // Нижняя граница свободного пространства
-uint32_t mem_used;      // Количество использованной памяти
 
-// Структура дескриптора
-struct mem_descriptor {
+struct mem_chain {
     
-    void *   start;      // Начало региона
-    uint32_t limit;      // Его размер
-    uint32_t param;      // Параметры блока
+    uint32_t next;      // Следующий блок (вниз)
+    uint32_t size;      // Размер этого блока. Если =0, блок не занят
     
 };
-
-// Всего возможно выделить MEM_MAX_DESC блоков памяти
-struct mem_descriptor mem_regions[ MEM_MAX_DESC ];

@@ -65,8 +65,7 @@ void vga_write_regs(unsigned char *regs) {
 	regs++;
 
     /* SEQUENCER регистры */
-	for (i = 0; i < VGA_NUM_SEQ_REGS; i++)
-	{
+	for (i = 0; i < VGA_NUM_SEQ_REGS; i++) {
 		IoWrite8(VGA_SEQ_INDEX, i);
 		IoWrite8(VGA_SEQ_DATA, *regs);
 		regs++;

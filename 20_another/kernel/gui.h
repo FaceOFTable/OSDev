@@ -6,9 +6,9 @@ struct window {
     int     x2, y2;
     int     w, h;
     char*   title;
-    int     in_use;         // Это окно загружено в систему
-    int     active;         // Окно активно
-    int     icon;           // Иконка. Пока не важно
+    uint8_t in_use;         // Это окно загружено в систему
+    uint8_t active;         // Окно активно
+    uint8_t bgcolor;        // Окно активно
 };
 
 // Зарегистрированные в системе окна
