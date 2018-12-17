@@ -185,61 +185,6 @@ void vga_cls(int color) {
     }
 }
 
-// Печать символа на экране
-void vga_pchar(int x, int y, unsigned char c, char color) {
-
-    int i, j, f = c * 16;
-
-    for (i = 0; i < 16; i++) {
-        for (j = 0; j < 8; j++) {
-            if (disp_vga_8x16_font[ f + i] & (1 << (7 - j)))
-                vga_pixel(x + j, y + i, color);
-        }
-    }
-}
-
-// Печать строки UTF-8 (maxsymb -- максимум символов)
-int vga_putf8(int x, int y, char* string, char color, int maxsymb) {
-
-    int num = 0;
-
-    while(*string) {
-
-        unsigned char chr = *string;
-
-        // Преобразовать UTF-8 в RUS
-        if (chr == 0xD0) {
-
-            string++;
-            chr = (*string) - 0x10;
-
-        }
-        else if (chr == 0xD1) {
-
-            string++;
-            chr = (*string);
-
-            if (chr < 0xB0)
-                chr = chr + 0x60;
-            else
-                chr = chr + 0x10;
-        }
-
-        // Псевдографика недоступна
-        vga_pchar(x, y, chr, color);
-
-        x += 8;
-        string++;
-        num++;
-
-        if (maxsymb && num >= maxsymb) {
-            return 0;
-        }
-    }
-
-    return num;
-}
-
 // 50% полупрозрачный блок сплошного цвета
 void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
@@ -255,12 +200,6 @@ void vga_dotted_block(int x1, int y1, int x2, int y2, uint8_t color) {
 void vga_block(int x1, int y1, int x2, int y2, uint8_t color) {
 
     int i, j, x;
-
-    if (y1 > 479 && y2 > 479)
-        return;
-
-    if (y1 > 479) y1 = 479;
-    if (y2 > 479) y2 = 479;
 
     int x1i = x1 >> 3;
     int x2i = x2 >> 3;
