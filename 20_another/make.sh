@@ -11,8 +11,8 @@ then
 if (clang -Os -ffreestanding -m32 -march=i386 -mno-sse -c -o kernel.o kernel.c)
 then
 
-# Выгрузка бинарного файла :: код располагается в $50000, данные в $0x200000
-if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x50000 -Tdata=0x200000 startup.o kernel.o -o kernel.c.bin)
+# Выгрузка бинарного файла :: код располагается в $9000, данные в $0x200000
+if (ld -m elf_i386 -nostdlib -nodefaultlibs --oformat binary -Ttext=0x9000 -Tdata=0x100000 startup.o kernel.o -o kernel.c.bin)
 then
 
 # Собрать Loader -- главный загрузчик

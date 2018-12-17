@@ -134,9 +134,9 @@ void vga_pixel(unsigned x, unsigned y, unsigned char c) {
 
 // Инициализация после INT 10h
 void vga_init() {
-    
+
     int i;
-    
+
     // Режим 2 (регистр выбор режима 5)
     // -- режим записи 1 слой цвета - 1 бит
     for (i = 0; i < 16; i++) {
@@ -177,7 +177,7 @@ void vga_cls(int color) {
 
     int i;
     char* vaddr = (char*)0xA0000;
-    
+
     IoWrite16(VGA_GC_INDEX, 0xFF08);
     for (i = 0; i < 80*480; i++) {
         volatile uint8_t t = vaddr[ i ];
@@ -231,12 +231,12 @@ int vga_putf8(int x, int y, char* string, char color, int maxsymb) {
         x += 8;
         string++;
         num++;
-        
+
         if (maxsymb && num >= maxsymb) {
             return 0;
         }
     }
-    
+
     return num;
 }
 

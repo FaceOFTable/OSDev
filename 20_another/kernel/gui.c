@@ -87,7 +87,7 @@ void window_activate(int id) {
 
 // Нарисовать кнопку
 void button(int x1, int y1, int w, int h, int pressed) {
-    
+
     int i, j;
 
     vga_block(x1,   y1,   x1+w, y1,   pressed ? 0  : 15);
@@ -96,21 +96,21 @@ void button(int x1, int y1, int w, int h, int pressed) {
     vga_block(x1,   y1+h, x1+w, y1+h, pressed ? 15 : 0);
 
     if (pressed) {
-        
+
         // Полусерая область
         vga_block(x1+1, y1+1, x1+w-1, y1+h-1, 15);
-        
-        for (i = y1+2; i < y1+h-1; i++) 
-        for (j = x1+2+i%2; j < x1+w-1; j += 2) 
+
+        for (i = y1+2; i < y1+h-1; i++)
+        for (j = x1+2+i%2; j < x1+w-1; j += 2)
             vga_pixel(j, i, 7);
-        
+
         vga_block(x1+1,   y1+1,   x1+w-1, y1+1,   8);
         vga_block(x1+1,   y1+1,   x1+1,   y1+h-1, 8);
         vga_block(x1+1,   y1+h-1, x1+w-1, y1+h-1, 7);
-        vga_block(x1+w-1, y1+1,   x1+w-1, y1+h-1, 7);  
-         
-    } else {        
-        
+        vga_block(x1+w-1, y1+1,   x1+w-1, y1+h-1, 7);
+
+    } else {
+
         vga_block(x1+1,   y1+h-1, x1+w-1, y1+h-1, 8);
         vga_block(x1+w-1, y1+1,   x1+w-1, y1+h-1, 8);
     }
@@ -118,7 +118,7 @@ void button(int x1, int y1, int w, int h, int pressed) {
 
 // Панель снизу перерисовать
 void panel_repaint() {
-    
+
     int t = 454, id, num = 0;
 
     vga_block(0, t,   639, t,   0);
@@ -136,25 +136,25 @@ void panel_repaint() {
     // Вертикальная полоса-разделитель
     vga_block(78, 458, 78, 477, 8);
     vga_block(79, 458, 79, 477, 15);
-    
+
     // Отрисовать текущие окна
     for (id = 1; id < WINDOW_MAX; id++) {
-        
+
         if (allwin[id].in_use) {
-            
+
             int x = 83 + 127*num;
             int y = 460;
-            
+
             // Нарисовать кнопку
             button(x, 458, 125, 19, allwin[id].active);
-            
+
             // Написать текст (макс 13 символов)
             int n = vga_putf8(x + 4, y, allwin[id].title, 0, 13);
-            
+
             // Если превышение, то дорисовать ..
             if (n == 0) vga_putf8(x + 4 + 13*8, y, "..", 0, 0);
-            
+
             num++;
         }
-    }    
+    }
 }

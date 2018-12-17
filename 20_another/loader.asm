@@ -48,15 +48,15 @@ pm:     mov     ax, 8
         or      ax, 3 shl 9             ; set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
         mov     cr4, eax
 
-        ; Скопировать ядро в память
-        mov     esi, os
-        mov     edi, 50000h
-        mov     ecx, len
+        ; Выровнять код
+        std
+        mov     esi, os + len
+        mov     edi, $9000 + len
+        mov     ecx, len + 1
         rep     movsb
-
-        ; Придется грузить сюда из-за vbox
-        jmp     10h : 50000h
-
+        cld
+        jmp     10h : 9000h
+        
 os:     file    "kernel.c.bin"
 len =   $ - os
         
