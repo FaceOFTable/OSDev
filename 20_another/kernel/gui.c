@@ -38,54 +38,14 @@ int window_create(int x, int y, int w, int h, char* title) {
     return 0;
 }
 
-// Полное обновление окна
-void window_repaint(int id) {
-
-    struct window* win = & allwin[ id ];
-    
-    // Подложка
-    block(win->x1+1, win->y1+1, win->x2-1, win->y2-1, 7);
-
-    // Черный ободок
-    block(win->x1,   win->y1,   win->x2,   win->y1, 0);
-    block(win->x1,   win->y1,   win->x1,   win->y2, 0);
-    block(win->x1,   win->y2,   win->x2,   win->y2, 0);
-    block(win->x2,   win->y1,   win->x2,   win->y2, 0);
-
-    // Белый ободок
-    block(win->x1+1, win->y1+1, win->x2-1, win->y1+1, 15);
-    block(win->x1+1, win->y1+1, win->x1+1, win->y2-1, 15);
-
-    // Заголовок
-    block(win->x1+2, win->y1+2, win->x2-2, win->y1+21, win->active ? 1 : 8);
-    
-    cursor.x = win->x1+6; cursor.y = win->y1+5; cursor.frcolor = 11; cursor.bgcolor = -1;
-    print("\x04");
-    
-    cursor.x = win->x1+6+12; cursor.frcolor = 15;
-    print(win->title);
-}
-
-// Активировать новое окно
-void window_activate(int id) {
-
-    int i;
-
-    for (i = 1; i < WINDOW_MAX; i++) {
-        allwin[i].active = 0;
-    }
-
-    allwin[id].active = 1;
-
-}
-
 // Нарисовать кнопку
 void button(int x1, int y1, int w, int h, int pressed) {
 
     int i, j;
     int x2 = x1 + w, 
         y2 = y1 + h;
-
+        
+    block(x1,   y1,   x2, y2, 7);
     block(x1,   y1,   x2, y1, pressed ? 0  : 15);
     block(x1+w, y1,   x2, y2, pressed ? 15 : 0);
     block(x1,   y1,   x1, y2, pressed ? 0  : 15);
@@ -110,6 +70,48 @@ void button(int x1, int y1, int w, int h, int pressed) {
         block(x1+1, y2-1, x2-1, y2-1, 8);
         block(x2-1, y1+1, x2-1, y2-1, 8);
     }
+}
+
+// Полное обновление окна
+void window_repaint(int id) {
+
+    struct window* win = & allwin[ id ];
+    
+    // Подложка
+    block(win->x1+1, win->y1+1, win->x2-1, win->y2-1, 7);
+
+    // Черный ободок
+    block(win->x1,   win->y1,   win->x2,   win->y1, 0);
+    block(win->x1,   win->y1,   win->x1,   win->y2, 0);
+    block(win->x1,   win->y2,   win->x2,   win->y2, 0);
+    block(win->x2,   win->y1,   win->x2,   win->y2, 0);
+
+    // Белый ободок
+    block(win->x1+1, win->y1+1, win->x2-1, win->y1+1, 15);
+    block(win->x1+1, win->y1+1, win->x1+1, win->y2-1, 15);
+
+    // Заголовок
+    block(win->x1+2, win->y1+2, win->x2-2, win->y1+21, win->active ? 1 : 8);
+    
+    // Печать самого заголовка
+    cursor_color(11, -1); print_xy("\x04",     win->x1+6,    win->y1+5);    
+    cursor_color(15, -1); print_xy(win->title, win->x1+6+12, win->y1+5);
+    
+    button(win->x2 - 19, win->y1 + 5, 15, 14, 0);
+    cursor_color(0, -1); print_xy("x", win->x2 - 15, win->y1 + 3);
+}
+
+// Активировать новое окно
+void window_activate(int id) {
+
+    int i;
+
+    for (i = 1; i < WINDOW_MAX; i++) {
+        allwin[i].active = 0;
+    }
+
+    allwin[id].active = 1;
+
 }
 
 // Панель снизу перерисовать

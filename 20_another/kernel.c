@@ -23,7 +23,7 @@ void main() {
     window_repaint(win1);
     
     // Печатаем, сколько памяти
-    // char t[24]; i2a(mem_max, t); print_utf8(4, 28, t, 0, -1, 0);    
+char t[24]; i2a(mem_max>>20, t); print_xy(t, 4, 28);    
     
     panel_repaint();
 
