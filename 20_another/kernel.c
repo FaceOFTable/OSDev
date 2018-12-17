@@ -9,6 +9,7 @@
 void main() {
 
     irq_init(IRQ_KEYB);
+    // detect_memory_size();
 
     vga_init();
     vga_cls(3);

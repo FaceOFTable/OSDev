@@ -30,6 +30,8 @@ void IRQ_cascade();
 #define int64_t     long long
 #define uint64_t    unsigned long long
 
+#define size_t      unsigned int
+
 // 64-х битный дескриптор прерывания
 struct IDT_Item {
 
