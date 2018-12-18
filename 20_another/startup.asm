@@ -2,13 +2,18 @@
 
 [EXTERN main]
 [EXTERN pic_keyboard]
+[EXTERN pic_ps2mouse]
 
 [GLOBAL _start]
 
 [GLOBAL apic_disable]
 [GLOBAL INT_null]
 [GLOBAL IRQ_keyboard]
+[GLOBAL IRQ_ps2mouse]
 [GLOBAL IRQ_cascade]
+[GLOBAL IRQ_master]
+[GLOBAL IRQ_slave]
+[GLOBAL delay]
 
 ; ----------------------------------------------------------------------
 _start: 
@@ -28,14 +33,44 @@ apic_disable:
         ret
 
 ; ----------------------------------------------------------------------
+delay:  push    ecx
+        mov     ecx, 32
+dely:   loop    dely
+        pop     ecx
+        ret
+        
+; ----------------------------------------------------------------------
 ; ПРЕРЫВАНИЯ
 
 INT_null:
 
         xchg    bx, bx
+        mov     ax, bx
+        iretd
+
+
+IRQ_master:
+
+        xchg    bx, bx
+        pushad
+        mov     al, 0x20
+        out     0x20, al
+        popad
+        iretd
+        
+IRQ_slave:
+
+        xchg    bx, bx
+        pushad
+        mov     al, 0x20
+        out     0xA0, al
+        out     0x20, al
+        popad
         iretd
 
 ; Обработчик клавиатуры
+; ----------------------------------------------------------------------
+
 IRQ_keyboard:
 
         pushad
@@ -47,6 +82,8 @@ IRQ_keyboard:
 
 
 ; Прерывание со slave
+; ----------------------------------------------------------------------
+
 IRQ_cascade:
 
         xchg bx, bx
@@ -54,5 +91,20 @@ IRQ_cascade:
         ; ..
         mov     al, 20h
         out     20h, al
+        popad
+        iretd
+
+; Прерывание от мыши
+; ----------------------------------------------------------------------
+
+IRQ_ps2mouse:
+
+        pushad
+        
+        call    pic_ps2mouse
+        
+        mov     al, 0x20
+        out     0xA0, al
+        out     0x20, al
         popad
         iretd

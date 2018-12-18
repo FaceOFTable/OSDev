@@ -4,7 +4,10 @@ void kernel_init() {
     int i;
 
     // Назначить обработчики
-    irq_init(IRQ_KEYB);
+    irq_init(IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE); // | IRQ_TIMER
+
+    // Инициализировать мышь
+    ps2_mouse_init();
 
     // Инициализация окон
     window_count = 0;
@@ -18,8 +21,8 @@ void kernel_init() {
     memory_size();
     
     // Установить позицию мыши
-    set_mouse_xy(320, 240);    
-    cursor.mouse_show = 1;
+    mouse_xy(320, 240);
+    mouse_show(0);    
 }
 
 // Конвертация числа в ASCIIZ
@@ -46,7 +49,7 @@ int i2a(int num, char* res) {
         if (num == 0)
             break;
     }
-    
+
     // Отрицательный знак
     if (neg) res[k++] = '-';
 

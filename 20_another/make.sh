@@ -28,7 +28,8 @@ then
 
     rm *.o
     rm kernel.c.bin
-    bochs -f c.bxrc -q >> /dev/null 2>&1
+    #bochs -f c.bxrc -q >> /dev/null 2>&1
+    bochs -f c.bxrc -q
 
 fi
 fi

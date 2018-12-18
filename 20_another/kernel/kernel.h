@@ -7,7 +7,11 @@
 void apic_disable();            // Отключить LAPIC
 void INT_null();                // Заглушка INT
 void IRQ_keyboard();
+void IRQ_ps2mouse();
 void IRQ_cascade();
+void IRQ_master();
+void IRQ_slave();
+void delay();
 
 // Некоторые константы
 // ---------------------------------------------------------------------
@@ -29,7 +33,6 @@ void IRQ_cascade();
 
 #define int64_t     long long
 #define uint64_t    unsigned long long
-
 #define size_t      unsigned int
 
 // 64-х битный дескриптор прерывания
@@ -66,6 +69,9 @@ struct IDT_Item {
 #define ICW4_BUF_SLAVE   0x08  /* Buffered mode/slave */
 #define ICW4_BUF_MASTER  0x0C  /* Buffered mode/master */
 #define ICW4_SFNM        0x10  /* Special fully nested (not) */
+
+// Устройства
+#define KB_WAIT          65536
 
 // Маски
 #define IRQ_TIMER        (1 << 0)

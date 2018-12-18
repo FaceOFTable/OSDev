@@ -8,7 +8,7 @@ struct window {
     char*   title;
     uint8_t in_use;         // Это окно загружено в систему
     uint8_t active;         // Окно активно
-    uint8_t bgcolor;        // Окно активно    
+    uint8_t bgcolor;        // Окно активно
 };
 
 // Зарегистрированные в системе окна

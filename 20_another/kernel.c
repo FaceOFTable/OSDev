@@ -6,23 +6,24 @@
 #include "kernel/canvas.c"
 #include "kernel/gui.c"
 #include "kernel/keyboard.c"
+#include "kernel/ps2mouse.c"
 #include "kernel/core.c"
+
+// ---------------------------------------------------------------------
 
 void main() {
 
     kernel_init();
+    
     vga_init();
-
     cls(3);
 
-    // Создать 2 окна
-    int win1 = window_create(0, 0, 640, 452, "Управление");
+    mouse_show(1);
 
-    // Активировать
-    window_activate(win1);
-    window_repaint(win1);
-
-    //update_mouse();
+    // --
+    int win = window_create(0, 0, 640, 452, "Управление");
+    window_activate(win); window_repaint(win);
+    // --
 
     // Печатаем, сколько памяти
 //char t[24]; i2a(mem_max>>20, t); print_xy(t, 4, 28);

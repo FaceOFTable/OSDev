@@ -39,7 +39,7 @@ PS2Mouse.Show:
         ; Сохранить область за курсором
         mov     di, [PS2Mouse.CursorA]
         mov     [PS2Mouse.loc.show.y], 21
-        mov     dx, [PS2Mouse.y]    ; y        
+        mov     dx, [PS2Mouse.y]    ; y
 .ly:    mov     cx, [PS2Mouse.x]    ; x
         mov     bh, 12
 .lx:    call    [GetPixel]
@@ -56,11 +56,11 @@ PS2Mouse.Show:
         inc     dx
         dec     [PS2Mouse.loc.show.y]
         jne     .ly
-        
+
         ; Вывести курсор (с учетом прозрачности)
         mov     si, PS2Mouse.Cursor
         mov     ax, [PS2Mouse.y]
-        mov     [PS2Mouse.loc.show.y], ax        
+        mov     [PS2Mouse.loc.show.y], ax
         mov     dl, 21
 
 .cursor_y:
@@ -70,14 +70,14 @@ PS2Mouse.Show:
         mov     [PS2Mouse.loc.show.x], ax
 
 .cursor_x3:
-        
+
         lodsb
         mov     bl, al
         mov     cl, 4
         push    si
-        
+
 .cursor_x:
-        
+
         rol     bl, 2
         mov     al, bl
         and     al, 3
@@ -90,13 +90,13 @@ PS2Mouse.Show:
         cmp     al, 1
         je      @f
         mov     ah, 0Fh
-@@:     mov     al, ah        
+@@:     mov     al, ah
         mov     si, [PS2Mouse.loc.show.x]
         mov     di, [PS2Mouse.loc.show.y]
         call    [SetPixel]
-        
+
 .skip_pixel:
-                
+
         inc     [PS2Mouse.loc.show.x]
         dec     cl
         jne     .cursor_x
@@ -107,7 +107,7 @@ PS2Mouse.Show:
 
         inc     [PS2Mouse.loc.show.y]
         dec     dl
-        jne     .cursor_y   
+        jne     .cursor_y
         ret
 
 ; Отключение прерывания мыши на время выполнения длинного CLI
@@ -119,4 +119,4 @@ PS2Mouse.Enable:
         out     0A1h, al
         pop     ax
         sti
-        ret        
+        ret

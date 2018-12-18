@@ -47,7 +47,7 @@ pm:     mov     ax, 8
         mov     eax, cr4
         or      ax, 3 shl 9             ; set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
         mov     cr4, eax
-
+  
         ; Выровнять код
         std
         mov     esi, os + len
@@ -56,7 +56,7 @@ pm:     mov     ax, 8
         rep     movsb
         cld
         jmp     10h : 9000h
-        
+
 os:     file    "kernel.c.bin"
 len =   $ - os
         

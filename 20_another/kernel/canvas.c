@@ -4,29 +4,6 @@
 
 #include "canvas.h"
 
-// Очистка экрана
-void cls(unsigned char color) {
-
-    int i;
-
-    // Заполнить цветом
-    for (i = 0; i < 640*480; i++)
-        canvas[i] = color;
-
-    vga_cls( color );
-
-    // Инициализация курсора
-    cursor.x = 0;
-    cursor.y = 0;
-    cursor.frcolor       = 0;
-    cursor.bgcolor       = -1;
-    cursor.border_top    = 0;
-    cursor.border_right  = 639;
-    cursor.border_bottom = 479;
-    cursor.border_left   = 0;
-    cursor.max_chars     = 0;
-}
-
 // Цвета курсора
 void cursor_color(int frcolor, int bgcolor) {
 
@@ -37,25 +14,20 @@ void cursor_color(int frcolor, int bgcolor) {
 // Проверка на наличие МЫШИ в данной точке
 unsigned char point(int x, int y) {
 
-    unsigned char color;
     int mx = cursor.mouse_x,
         my = cursor.mouse_y;
 
     // Возможно, тут находится МЫШЬ
     if (mx <= x && x < mx + 12 && my <= y && y < my + 21) {
+        
+        int xn = x - mx;
 
-        color = cursor.mouse_show ? (mouse_icon[y - my] >> (2*(11 - x - mx))) & 3 : 0;
+        // Выбор точки и получение цвета
+        switch (cursor.mouse_show ? (mouse_icon[y - my] >> (2*(11 - xn))) & 3 : 0) {
 
-        if (color) {
-
-            switch (color) {
-                case 1:  color = 7;  break;
-                case 2:  color = 15; break;
-                case 3:  color = 8;  break;
-            }
-
-            return color;
-
+            case 1: return 7;
+            case 2: return 15;
+            case 3: return 8;
         }
     }
 
@@ -66,7 +38,7 @@ unsigned char point(int x, int y) {
 // Нарисовать точку как на экране, так и в BB
 void pset(int x, int y, unsigned char color) {
 
-    if (x >= 0 && x < 640 && y >= 0 && y < 480) {
+    if (x >= 0 && y >= 0 && x < 640 && y < 480) {
 
         int mc = point(x, y);
 
@@ -83,24 +55,19 @@ void block_draw(int x1, int y1, int x2, int y2, unsigned char color) {
 
     int i, j;
 
-    if (x1 < 0 && x2 < 0)
+    // Превышение нижних границ
+    if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0))
         return;
 
-    if (y1 < 0 && y2 < 0)
+    // Превышение верхних границ
+    if (x1 > 639 || y1 > 479 || x1 > x2 || y1 > y2)
         return;
 
-    if ((x1 > 639 && x2 > 639) || x1 > x2)
-        return;
+    // Корректировка границ
+    if (x1 < 0) x1 = 0; if (x2 > 639) x2 = 639;
+    if (y1 < 0) y1 = 0; if (y2 > 479) y2 = 479;
 
-    if ((y1 > 479 && y2 > 479) || y1 > y2)
-        return;
-
-    if (x1 > 639) x1 = 639; if (y1 > 479) y1 = 479;
-    if (x2 > 639) x2 = 639; if (y2 > 479) y2 = 479;
-    if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0;
-    if (x2 < 0) x2 = 0; if (y2 < 0) y2 = 0;
-    
-    // bbuf
+    // Буфер
     for (i = y1; i <= y2; i++)
     for (j = x1; j <= x2; j++)
         canvas[640*i + j] = color;
@@ -113,22 +80,67 @@ void block_draw(int x1, int y1, int x2, int y2, unsigned char color) {
 void block(int x1, int y1, int x2, int y2, unsigned char color) {
 
     cli;
-    int i, j;
-    
-    // Мышь показана, применить другой метод рисования блока
-    if (cursor.mouse_show) {
-        
-        for (i = y1; i <= y2; i++)
-        for (j = x1; j <= x2; j++)
-            pset(j, i, color);        
 
-    } else {
-        
+    int i, j;
+    int mx  = cursor.mouse_x,
+        my  = cursor.mouse_y,
+        myh = my + 21;
+
+    // Выходит за пределы рисования блока с мышью [0..+20]
+    if (y1 <= y2 && ((y2 < my) || (y1 > my + 20))) {
+        block_draw(x1, y1, x2, y2, color);
+
+    }
+    // Мышь показана, применить другой метод рисования блока
+    else if (cursor.mouse_show) {
+
+        // Случай, когда пересекает верхнюю границу (y1 < my < y2)
+        if (y1 < my && my <= y2) {
+            block_draw(x1, y1, x2, my - 1, color);
+        }
+
+        // Средний блок, один из краев принадлежит [my, my+20], либо оба находятся за границами
+        if ( (my <= y1 && y1 < myh) || (my <= y2 && y2 < myh) || (y1 < my && y2 >= myh) ) {
+
+            // Рисовать саму мышь
+            for (i = my; i <= my + 20; i++)
+            for (j = x1; j <= x2; j++)
+                pset(j, i, color);
+        }
+
+        // Нижний блок [my+21..y2]
+        if (y1 < myh && y2 >= myh) {
+            block_draw(x1, myh, x2, y2, color);
+        }
+    }
+    // Просто отобразить блок
+    else {
         block_draw(x1, y1, x2, y2, color);
     }
+
     sti;
 }
 // ---------------------------------------------------------------------
+
+// Очистка экрана
+void cls(unsigned char color) {
+
+    int i;
+
+    // Заполнить цветом
+    block(0, 0, 639, 479, color);
+
+    // Инициализация курсора
+    cursor.x = 0;
+    cursor.y = 0;
+    cursor.frcolor       = 0;
+    cursor.bgcolor       = -1;
+    cursor.border_top    = 0;
+    cursor.border_right  = 639;
+    cursor.border_bottom = 479;
+    cursor.border_left   = 0;
+    cursor.max_chars     = 0;
+}
 
 /** Печать символа на экране в режиме телетайпа
  * @param x, y позиция в пикселях
@@ -212,8 +224,32 @@ int print_xy(char* m, int x, int y) {
 
 /** Положение мыши
  * */
-void set_mouse_xy(int x, int y) {
+void mouse_xy(int x, int y) {
 
     cursor.mouse_x = x;
     cursor.mouse_y = y;
+}
+
+// Показать или скрыть мышь
+void mouse_show(int show) {
+    cursor.mouse_show = show;
+}
+
+// Обновить регион
+void update_region(int x1, int y1, int x2, int y2) {
+
+    int i, j, color;
+    for (i = y1; i <= y2; i++)
+    for (j = x1; j <= x2; j++) {
+
+        color = point(j, i);
+        vga_pixel(j, i, color ? color : canvas[640*i + j]);
+    }
+}
+
+// Обновить регион с мышью
+void update_mouse() {
+
+    update_region(cursor.mouse_x,    cursor.mouse_y,
+                  cursor.mouse_x+12, cursor.mouse_y+21);
 }

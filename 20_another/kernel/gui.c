@@ -164,22 +164,3 @@ void panel_repaint() {
 
     cursor.max_chars = 0;
 }
-
-// Обновить регион
-void update_region(int x1, int y1, int x2, int y2) {
-
-    int i, j, color;
-    for (i = y1; i <= y2; i++)
-    for (j = x1; j <= x2; j++) {
-
-        color = point(j, i);
-        vga_pixel(j, i, color ? color : canvas[640*i + j]);
-    }
-}
-
-// Обновить регион с мышью
-void update_mouse() {
-
-    update_region(cursor.mouse_x,    cursor.mouse_y,
-                  cursor.mouse_x+12, cursor.mouse_y+21);
-}
