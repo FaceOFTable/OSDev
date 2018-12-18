@@ -29,23 +29,57 @@ void cls(unsigned char color) {
 
 // Цвета курсора
 void cursor_color(int frcolor, int bgcolor) {
-    
+
     cursor.frcolor = frcolor;
     cursor.bgcolor = bgcolor;
 }
 
-// Нарисовать точку как на экране, так и в back-буфере
+// Проверка на наличие МЫШИ в данной точке
+unsigned char point(int x, int y) {
+
+    unsigned char color;
+    int mx = cursor.mouse_x,
+        my = cursor.mouse_y;
+
+    // Возможно, тут находится МЫШЬ
+    if (mx <= x && x < mx + 12 && my <= y && y < my + 21) {
+
+        color = cursor.mouse_show ? (mouse_icon[y - my] >> (2*(11 - x - mx))) & 3 : 0;
+
+        if (color) {
+
+            switch (color) {
+                case 1:  color = 7;  break;
+                case 2:  color = 15; break;
+                case 3:  color = 8;  break;
+            }
+
+            return color;
+
+        }
+    }
+
+    return 0;
+}
+
+// ---------------------------------------------------------------------
+// Нарисовать точку как на экране, так и в BB
 void pset(int x, int y, unsigned char color) {
 
     if (x >= 0 && x < 640 && y >= 0 && y < 480) {
 
-        vga_pixel(x, y, color);
+        int mc = point(x, y);
+
+        // Если тут есть мышь, то ее нарисовать вместо точки
+        vga_pixel(x, y, mc ? mc : color);
+
+        // А саму точку отправить в BB
         canvas[640*y + x] = color;
     }
 }
 
-// Нарисовать блок
-void block(int x1, int y1, int x2, int y2, unsigned char color) {
+// Реально нарисовать блок
+void block_draw(int x1, int y1, int x2, int y2, unsigned char color) {
 
     int i, j;
 
@@ -65,7 +99,7 @@ void block(int x1, int y1, int x2, int y2, unsigned char color) {
     if (x2 > 639) x2 = 639; if (y2 > 479) y2 = 479;
     if (x1 < 0) x1 = 0; if (y1 < 0) y1 = 0;
     if (x2 < 0) x2 = 0; if (y2 < 0) y2 = 0;
-
+    
     // bbuf
     for (i = y1; i <= y2; i++)
     for (j = x1; j <= x2; j++)
@@ -74,6 +108,27 @@ void block(int x1, int y1, int x2, int y2, unsigned char color) {
     // На экране
     vga_block(x1, y1, x2, y2, color);
 }
+
+// Нарисовать блок :: очищается I=0, чтобы не вызвать прерывание мыши
+void block(int x1, int y1, int x2, int y2, unsigned char color) {
+
+    cli;
+    int i, j;
+    
+    // Мышь показана, применить другой метод рисования блока
+    if (cursor.mouse_show) {
+        
+        for (i = y1; i <= y2; i++)
+        for (j = x1; j <= x2; j++)
+            pset(j, i, color);        
+
+    } else {
+        
+        block_draw(x1, y1, x2, y2, color);
+    }
+    sti;
+}
+// ---------------------------------------------------------------------
 
 /** Печать символа на экране в режиме телетайпа
  * @param x, y позиция в пикселях
@@ -98,7 +153,7 @@ void print_char(unsigned char chr) {
             }
         }
     }
-    
+
     cursor.x += 8;
 }
 
@@ -152,5 +207,13 @@ int print_xy(char* m, int x, int y) {
     cursor.x = x;
     cursor.y = y;
 
-    return print(m);    
+    return print(m);
+}
+
+/** Положение мыши
+ * */
+void set_mouse_xy(int x, int y) {
+
+    cursor.mouse_x = x;
+    cursor.mouse_y = y;
 }

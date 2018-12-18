@@ -6,7 +6,7 @@
 #include "kernel/canvas.c"
 #include "kernel/gui.c"
 #include "kernel/keyboard.c"
-#include "kernel/core.c" 
+#include "kernel/core.c"
 
 void main() {
 
@@ -21,10 +21,12 @@ void main() {
     // Активировать
     window_activate(win1);
     window_repaint(win1);
-    
+
+    //update_mouse();
+
     // Печатаем, сколько памяти
-char t[24]; i2a(mem_max>>20, t); print_xy(t, 4, 28);    
-    
+//char t[24]; i2a(mem_max>>20, t); print_xy(t, 4, 28);
+
     panel_repaint();
 
     sti; for(;;);

@@ -16,6 +16,10 @@ void kernel_init() {
 
     // Определить размер памяти
     memory_size();
+    
+    // Установить позицию мыши
+    set_mouse_xy(320, 240);    
+    cursor.mouse_show = 1;
 }
 
 // Конвертация числа в ASCIIZ

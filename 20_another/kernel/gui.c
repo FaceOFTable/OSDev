@@ -42,9 +42,9 @@ int window_create(int x, int y, int w, int h, char* title) {
 void button(int x1, int y1, int w, int h, int pressed) {
 
     int i, j;
-    int x2 = x1 + w, 
+    int x2 = x1 + w,
         y2 = y1 + h;
-        
+
     block(x1,   y1,   x2, y2, 7);
     block(x1,   y1,   x2, y1, pressed ? 0  : 15);
     block(x1+w, y1,   x2, y2, pressed ? 15 : 0);
@@ -76,7 +76,7 @@ void button(int x1, int y1, int w, int h, int pressed) {
 void window_repaint(int id) {
 
     struct window* win = & allwin[ id ];
-    
+
     // Подложка
     block(win->x1+1, win->y1+1, win->x2-1, win->y2-1, 7);
 
@@ -92,11 +92,11 @@ void window_repaint(int id) {
 
     // Заголовок
     block(win->x1+2, win->y1+2, win->x2-2, win->y1+21, win->active ? 1 : 8);
-    
+
     // Печать самого заголовка
-    cursor_color(11, -1); print_xy("\x04",     win->x1+6,    win->y1+5);    
+    cursor_color(11, -1); print_xy("\x04",     win->x1+6,    win->y1+5);
     cursor_color(15, -1); print_xy(win->title, win->x1+6+12, win->y1+5);
-    
+
     button(win->x2 - 19, win->y1 + 5, 15, 14, 0);
     cursor_color(0, -1); print_xy("x", win->x2 - 15, win->y1 + 3);
 }
@@ -118,7 +118,7 @@ void window_activate(int id) {
 void panel_repaint() {
 
     int t = 454, id, num = 0;
-    
+
     cursor_color(0, -1);
 
     block(0, t,   639, t,   0);
@@ -136,7 +136,7 @@ void panel_repaint() {
     // Вертикальная полоса-разделитель
     block(78, 458, 78, 477, 8);
     block(79, 458, 79, 477, 15);
-    
+
     // Параметры вывода
     cursor_color(0, -1);
     cursor.max_chars = 13;
@@ -161,6 +161,25 @@ void panel_repaint() {
             num++;
         }
     }
-    
+
     cursor.max_chars = 0;
+}
+
+// Обновить регион
+void update_region(int x1, int y1, int x2, int y2) {
+
+    int i, j, color;
+    for (i = y1; i <= y2; i++)
+    for (j = x1; j <= x2; j++) {
+
+        color = point(j, i);
+        vga_pixel(j, i, color ? color : canvas[640*i + j]);
+    }
+}
+
+// Обновить регион с мышью
+void update_mouse() {
+
+    update_region(cursor.mouse_x,    cursor.mouse_y,
+                  cursor.mouse_x+12, cursor.mouse_y+21);
 }
