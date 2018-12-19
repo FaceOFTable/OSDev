@@ -23,33 +23,6 @@ void load_gdt(uint64_t gdt_mem_base) {
                     : "memory");
 }
 
-// Инициалиазция GDT из старых данных
-void init_gdt() {
-
-    uint32_t i;
-
-    // Выделить системную память под новую
-    uint8_t* m = (uint8_t*)malloc(65536);
-
-    // Записать дальнейший адрес таблицы
-    GDT = (struct GDT_item*)m;
-
-    // Получение предыдущего адреса
-    uint64_t GDT_prev  =  save_gdt();
-    uint32_t GDT_addr  =  GDT_prev >> 16;
-    uint32_t GDT_limit = (GDT_prev & 0xFFFF) + 1;
-
-    // Копирование из предыдущего GDT
-    uint8_t* s = (uint8_t*)GDT_addr;
-
-    // Перенос старых данных
-    for (i = 0; i < GDT_limit; i++) m[i] = s[i];
-
-    // Количество дескрипторов будет пока что тоже самое
-    uint64_t g = ((uint64_t)m << 16) | (GDT_limit - 1);
-    load_gdt(g);
-}
-
 // Создание нового сегмента GDT
 int create_gdt(uint32_t address, uint32_t limit, uint8_t access) {
 
@@ -97,17 +70,45 @@ int create_gdt(uint32_t address, uint32_t limit, uint8_t access) {
     return found;
 }
 
+// Инициалиазция GDT из старых данных
+void init_gdt() {
+
+    uint32_t i;
+
+    // Выделить системную память под новую
+    uint8_t* m = (uint8_t*)malloc(65536);
+
+    // Записать дальнейший адрес таблицы
+    GDT = (struct GDT_item*)m;
+
+    // Получение предыдущего адреса
+    uint64_t GDT_prev  =  save_gdt();
+    uint32_t GDT_addr  =  GDT_prev >> 16;
+    uint32_t GDT_limit = (GDT_prev & 0xFFFF) + 1;
+
+    // Копирование из предыдущего GDT
+    uint8_t* s = (uint8_t*)GDT_addr;
+
+    // Перенос старых данных
+    for (i = 0; i < GDT_limit; i++) m[i] = s[i];
+
+    // Количество дескрипторов будет пока что тоже самое
+    uint64_t g = ((uint64_t)m << 16) | (GDT_limit - 1);
+    load_gdt(g);
+}
+
 // Создание и переключение на главный TSS
 void init_main_task() {
 
     TSS_Main = (struct TSS_item*)malloc(104);
-brk;
-    uint16_t id = create_gdt((uint32_t)TSS_Main, 103, TYPE_TSS_AVAIL); 
+
+    // @todo Выделение стека разного уровня
+
+    // Добавление дескриптора
+    uint16_t id = create_gdt((uint32_t)TSS_Main, 103, TYPE_TSS_AVAIL);
 
     // Загрузка первой задачи TI=0, CPL=00
     __asm__ __volatile__ ("ltr %0" : : "r"((uint16_t)(id << 3)) );
-                    //: "memory")
-    // выделить память под tss
 }
 
 // Очистка регионов памяти
@@ -131,6 +132,8 @@ void init() {
     memory_size();          // Определить размер памяти
     init_gdt();             // Инициализация
     init_main_task();       // Создание главной задачи
+    ata_drive_detect();     // Инициализация дисков
+    
     vga_init();             // Подготовить VGA палитру
 
     mouse_xy(320, 240);     // Установить позицию мыши
