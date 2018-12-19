@@ -64,7 +64,7 @@ int detect_devtype(int slavebit, struct DEVICE* ctrl) {
 
 // Куда читать сектор
 void drive_read(int base, uint8_t* address) {
-    
+
     __asm__ __volatile__("pushl %%ecx" ::: "ecx");
     __asm__ __volatile__("pushl %%edx" ::: "edx");
     __asm__ __volatile__("pushl %%edi" ::: "edi");
@@ -113,34 +113,37 @@ void drive_identify(int id) {
         if ((IoRead8(ctrl->base + REG_CMD) & 0x80) == 0) {
 
             // Читаем 1 сектор в режиме PIO
-            drive_read(ctrl->base, ctrl->identify );
+            drive_read(ctrl->base, ctrl->identify );        
+            return;
         }
     }
 }
 
 // Найти ATA диски
 void ata_drive_detect() {
-
+brk;
     // IDE 0, Primary
     drive[0].base    = 0x1F0;
     drive[0].dev_ctl = 0x3F6;
     drive[0].type    = detect_devtype(0, & drive[0]);
-
     drive_identify(0);
 
     // IDE 0, Primary
     drive[1].base    = 0x1F0;
     drive[1].dev_ctl = 0x3F6;
-    drive[1].type    = detect_devtype(1, & drive[1]);
+    drive[1].type    = detect_devtype(1, & drive[1]);    
+    drive_identify(1);
 
     // IDE 1, Primary
     drive[2].base    = 0x170;
     drive[2].dev_ctl = 0x376;
     drive[2].type    = detect_devtype(0, & drive[2]);
+    drive_identify(2);
 
     // IDE 1, Slave
     drive[3].base    = 0x170;
     drive[3].dev_ctl = 0x376;
     drive[3].type    = detect_devtype(1, & drive[3]);
+    drive_identify(3);
 }
 

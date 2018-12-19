@@ -23,9 +23,9 @@
 void main() {
 
     init();
-    
+
     // найти ata в системе
-    
+
     cls(3);
     mouse_show(1);
 
