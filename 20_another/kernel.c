@@ -1,6 +1,7 @@
 
 #include "kernel/kernel.h"
 #include "kernel/fs.h"
+#include "kernel/core.h"
 
 // Графика
 #include "kernel/vga.c"
@@ -33,7 +34,7 @@ void main() {
     // --
     
     int i, j;
-    
+    /*
     for (i = 0; i < 16; i++) {
         
         colorat(4, i*16+32, 7, 0);
@@ -42,8 +43,12 @@ void main() {
              print(" ");
         }
     }
+    */
+    
+    colorat(4,400,0,-1);
+    print_int(fat_found);
 
-    // char t[24]; i2a(g, t); print_xy(t, 4, 28);
+    // 
 
     panel_repaint();
 

@@ -261,6 +261,15 @@ void print_hex32(uint32_t hex) {
     print_hex16(hex);
 }
 
+// Печать числа
+void print_int(int data) {
+    
+    char tmp[24];     
+    
+    i2a(data, tmp);
+    print(tmp);
+}
+
 /** Положение мыши
  * */
 void mouse_xy(int x, int y) {

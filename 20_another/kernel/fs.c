@@ -177,10 +177,29 @@ void drive_read_sectors(uint8_t* address, int device_id, int lba, int count) {
 // Определение FAT на устройстве
 void fat_detect(int device_id) {
 
+    int i;
     uint8_t sector[512];
 
     // Прочесть один сектор с диска для распознания MBR
     drive_read_sectors(sector, device_id, 0, 1);
+    
+    struct MBR_BLOCK* block = (struct MBR_BLOCK*)(sector + 0x1BE);
+
+    // Читаем mbr
+    for (i = 0; i < 4; i++) {
+        
+        switch (block[ i ].type) {
+            
+            case FS_TYPE_FAT12:
+            case FS_TYPE_FAT16:
+            case FS_TYPE_FAT32:
+            
+                fatfs[ fat_found ].fs_type = block[0].type;
+
+                fat_found++;
+                break;        
+        }        
+    }     
 }
 
 // Найти ATA диски
@@ -189,12 +208,16 @@ void init_ata_drives() {
     fat_found = 0;
 
     int device_id;
+    
+    // Перечисление 4 типов шин
     for (device_id = 0; device_id < 4; device_id++) {
 
+        // Определить тип устройства
         drive[device_id].base    = device_id < 2 ? 0x1F0 : 0x170;
         drive[device_id].dev_ctl = device_id < 2 ? 0x3F6 : 0x376;
         drive[device_id].type    = detect_devtype(device_id & 1, & drive[ device_id ]);
 
+        // Устройство готов
         if (drive_identify(device_id)) {
             fat_detect(device_id);
         }

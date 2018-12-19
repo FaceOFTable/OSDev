@@ -49,6 +49,21 @@ struct FAT_BLOCK {
     uint32_t  fat_count;    // Количество
 };
 
+// Блок раздела
+struct MBR_BLOCK {
+    
+    uint8_t   active;
+    uint8_t   start_head;
+    uint8_t   start_sector;
+    uint8_t   start_cylinder;
+    uint8_t   type;
+    uint8_t   end_head;
+    uint8_t   end_sector;
+    uint8_t   end_cylinder;
+    uint32_t  lba_start;
+    uint32_t  count;    
+};
+
 // ---------------------------------------
 
 int fat_found;  // Количество найденных FAT
