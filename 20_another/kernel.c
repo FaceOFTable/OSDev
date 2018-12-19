@@ -1,21 +1,27 @@
 
 #include "kernel/kernel.h"
-#include "kernel/mm.c"
-#include "kernel/pic.c"
+
+// Графика
 #include "kernel/vga.c"
 #include "kernel/canvas.c"
 #include "kernel/gui.c"
+
+// Устройства
 #include "kernel/keyboard.c"
 #include "kernel/ps2mouse.c"
+
+// Ядро
+#include "kernel/mm.c"
+#include "kernel/pic.c"
 #include "kernel/core.c"
+#include "kernel/task.c"
 
 // ---------------------------------------------------------------------
 
 void main() {
 
-    kernel_init();
+    init();
     
-    vga_init();
     cls(3);
 
     mouse_show(1);
@@ -25,8 +31,9 @@ void main() {
     window_activate(win); window_repaint(win);
     // --
 
+
     // Печатаем, сколько памяти
-//char t[24]; i2a(mem_max>>20, t); print_xy(t, 4, 28);
+//char t[24]; i2a(g, t); print_xy(t, 4, 28);
 
     panel_repaint();
 
