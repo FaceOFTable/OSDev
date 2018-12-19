@@ -132,7 +132,7 @@ void vga_pixel(unsigned x, unsigned y, unsigned char c) {
 }
 
 // Инициализация после INT 10h
-void vga_init() {
+void init_vga() {
 
     int i;
 

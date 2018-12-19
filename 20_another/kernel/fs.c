@@ -63,7 +63,7 @@ int detect_devtype(int slavebit, struct DEVICE* ctrl) {
 }
 
 // Куда читать сектор
-void drive_read(int base, uint8_t* address) {
+void drive_pio_read(int base, uint8_t* address) {
 
     __asm__ __volatile__("pushl %%ecx" ::: "ecx");
     __asm__ __volatile__("pushl %%edx" ::: "edx");
@@ -78,13 +78,13 @@ void drive_read(int base, uint8_t* address) {
 }
 
 // id = [0..3], номер ata
-void drive_identify(int id) {
+int drive_identify(int id) {
 
     int i;
 
     // Не использовать идентификацию для нерабочего устройства
     if (drive[id].type == ATADEV_UNKNOWN)
-        return;
+        return 0;
 
     int slavebit = id & 1;
     struct DEVICE * ctrl = & drive[id];
@@ -104,7 +104,7 @@ void drive_identify(int id) {
     int w = IoRead8(ctrl->base + REG_CMD);
 
     // Ошибка драйва?
-    if (w == 0) return;
+    if (w == 0) return 0;
 
     // Ожидание устройства
     for (i = 0; i < 4096; i++) {
@@ -113,37 +113,91 @@ void drive_identify(int id) {
         if ((IoRead8(ctrl->base + REG_CMD) & 0x80) == 0) {
 
             // Читаем 1 сектор в режиме PIO
-            drive_read(ctrl->base, ctrl->identify );        
-            return;
+            drive_pio_read(ctrl->base, ctrl->identify);
+
+            // Определяем стартовый сектор
+            if ((uint32_t)(*((uint32_t*)ctrl->identify + 0x5)) == 0x48444258) {
+                drive[id].start = 1;
+            } else {
+                drive[id].start = 0;
+            }
+
+            return 1;
         }
+    }
+
+    return 0;
+}
+
+// Подготовка устройства к запросу на чтение или запись
+// command = 0x24 READ; 0x34 WRITE
+void drive_prepare_lba(int device_id, uint32_t lba, int count, int command) {
+
+    int base = drive[ device_id ].base;
+
+    // Коррекция BXHD
+    lba += drive[ device_id ].start;
+
+    // Выбор устройства (primary | slave)
+    drive_select(device_id & 1, &drive[ device_id ]);
+
+    IoWrite8(base + REG_COUNT,   (count >>  8) & 0xFF);
+    IoWrite8(base + REG_LBA_LO,  (lba   >> 24) & 0xFF);
+    IoWrite8(base + REG_LBA_MID, 0);
+    IoWrite8(base + REG_LBA_HI,  0);
+
+    IoWrite8(base + REG_COUNT,   (count    ) & 0xFF);
+    IoWrite8(base + REG_LBA_LO,  (lba      ) & 0xFF);
+    IoWrite8(base + REG_LBA_MID, (lba >>  8) & 0xFF);
+    IoWrite8(base + REG_LBA_HI,  (lba >> 16) & 0xFF);
+
+    // Запрос чтения
+    IoWrite8(base + REG_CMD, command);
+}
+
+// Чтение сектора с выбранного ATA
+void drive_read_sectors(uint8_t* address, int device_id, int lba, int count) {
+
+    int i;
+    int base = drive[ device_id ].base;
+
+    // Подготовить для чтения
+    drive_prepare_lba(device_id, lba, count, 0x24);
+
+    // Ждем BSY=0
+    for (i = 0; i < 4096; i++)
+    if ((IoRead8(base + REG_CMD) & 0x80) == 0) {
+
+        // Читаем 1 сектор в режиме PIO
+        drive_pio_read(base, address);
+        return;
     }
 }
 
+// Определение FAT на устройстве
+void fat_detect(int device_id) {
+
+    uint8_t sector[512];
+
+    // Прочесть один сектор с диска для распознания MBR
+    drive_read_sectors(sector, device_id, 0, 1);
+}
+
 // Найти ATA диски
-void ata_drive_detect() {
-brk;
-    // IDE 0, Primary
-    drive[0].base    = 0x1F0;
-    drive[0].dev_ctl = 0x3F6;
-    drive[0].type    = detect_devtype(0, & drive[0]);
-    drive_identify(0);
+void init_ata_drives() {
 
-    // IDE 0, Primary
-    drive[1].base    = 0x1F0;
-    drive[1].dev_ctl = 0x3F6;
-    drive[1].type    = detect_devtype(1, & drive[1]);    
-    drive_identify(1);
+    fat_found = 0;
 
-    // IDE 1, Primary
-    drive[2].base    = 0x170;
-    drive[2].dev_ctl = 0x376;
-    drive[2].type    = detect_devtype(0, & drive[2]);
-    drive_identify(2);
+    int device_id;
+    for (device_id = 0; device_id < 4; device_id++) {
 
-    // IDE 1, Slave
-    drive[3].base    = 0x170;
-    drive[3].dev_ctl = 0x376;
-    drive[3].type    = detect_devtype(1, & drive[3]);
-    drive_identify(3);
+        drive[device_id].base    = device_id < 2 ? 0x1F0 : 0x170;
+        drive[device_id].dev_ctl = device_id < 2 ? 0x3F6 : 0x376;
+        drive[device_id].type    = detect_devtype(device_id & 1, & drive[ device_id ]);
+
+        if (drive_identify(device_id)) {
+            fat_detect(device_id);
+        }
+    }
 }
 

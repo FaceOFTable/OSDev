@@ -50,7 +50,7 @@ int kb_read() {
 }
 
 // Инициализацировать мышь
-void ps2_mouse_init() {
+void init_ps2_mouse() {
 
     int a;
 

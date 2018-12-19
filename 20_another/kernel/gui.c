@@ -1,6 +1,28 @@
 
 #include "gui.h"
 
+void init_windows() {
+
+    uint32_t i, j;
+
+    // Инициализация окон
+    window_count = 0;
+
+    // Очень хитрый способ очистить все данные
+    for (i = 0; i < WINDOW_MAX; i++) {
+
+        for (j = 0; j < sizeof(struct window); j++) {
+
+            char* p = (char*)(& allwin[i]);
+            p[j] = 0;
+        }
+    }
+
+    // Установить позицию мыши
+    mouse_xy(320, 240);
+    mouse_show(0);
+}
+
 // Инициализировать окно id=[1..n]
 void window_init(int id, int x, int y, int w, int h, char* title) {
 
@@ -94,11 +116,11 @@ void window_repaint(int id) {
     block(win->x1+2, win->y1+2, win->x2-2, win->y1+21, win->active ? 1 : 8);
 
     // Печать самого заголовка
-    cursor_color(11, -1); print_xy("\x04",     win->x1+6,    win->y1+5);
-    cursor_color(15, -1); print_xy(win->title, win->x1+6+12, win->y1+5);
+    color(11, -1); print_at(win->x1+6,    win->y1+5, "\x04");
+    color(15, -1); print_at(win->x1+6+12, win->y1+5, win->title);
 
     button(win->x2 - 19, win->y1 + 5, 15, 14, 0);
-    cursor_color(0, -1); print_xy("x", win->x2 - 15, win->y1 + 3);
+    color(0, -1); print_at(win->x2 - 15, win->y1 + 3, "x");
 }
 
 // Активировать новое окно
@@ -119,7 +141,7 @@ void panel_repaint() {
 
     int t = 454, id, num = 0;
 
-    cursor_color(0, -1);
+    color(0, -1);
 
     block(0, t,   639, t,   0);
     block(0, t+1, 639, t+1, 15);
@@ -131,14 +153,14 @@ void panel_repaint() {
     // Лого
     block(6, 461, 11, 466, 4); block(13, 461, 18, 466, 2);
     block(6, 468, 11, 473, 1); block(13, 468, 18, 473, 6);
-    print_xy("Запуск", 3 + 20, 459 + 1);
+    print_at(3 + 20, 459 + 1, "Запуск");
 
     // Вертикальная полоса-разделитель
     block(78, 458, 78, 477, 8);
     block(79, 458, 79, 477, 15);
 
     // Параметры вывода
-    cursor_color(0, -1);
+    color(0, -1);
     cursor.max_chars = 13;
 
     // Отрисовать текущие окна
@@ -153,10 +175,10 @@ void panel_repaint() {
             button(x, 458, 125, 19, allwin[id].active);
 
             // Написать текст (макс 13 символов)
-            int n = print_xy(allwin[id].title, x + 4, y);
+            int n = print_at(x + 4, y, allwin[id].title);
 
             // Если превышение, то дорисовать ..
-            if (n == 0) print_xy("..", x + 4 + 13*8, y);
+            if (n == 0) print_at(x + 4 + 13*8, y, "..");
 
             num++;
         }

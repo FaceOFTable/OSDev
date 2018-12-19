@@ -114,30 +114,16 @@ void init_main_task() {
 // Очистка регионов памяти
 void init() {
 
-    uint32_t i;
+    int mask = IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE; // | IRQ_TIMER
 
-    // Назначить обработчики
-    irq_init(IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE); // | IRQ_TIMER
-
-    // Инициализировать мышь
-    ps2_mouse_init();
-
-    // Инициализация окон
-    window_count = 0;
-    for (i = 0; i < WINDOW_MAX; i++) {
-        allwin[i].in_use = 0;
-        allwin[i].active = 0;
-    }
-
-    memory_size();          // Определить размер памяти
+    init_irq(mask);         // Назначить обработчики IRQ
+    init_ps2_mouse();       // Инициализировать мышь
+    init_memory_size();     // Определить размер памяти
     init_gdt();             // Инициализация
     init_main_task();       // Создание главной задачи
-    ata_drive_detect();     // Инициализация дисков
-    
-    vga_init();             // Подготовить VGA палитру
-
-    mouse_xy(320, 240);     // Установить позицию мыши
-    mouse_show(0);
+    init_ata_drives();      // Инициализация дисков
+    init_vga();             // Подготовить VGA палитру
+    init_windows();         // Инициализация окон
 }
 
 // Конвертация числа в ASCIIZ

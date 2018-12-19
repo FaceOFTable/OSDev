@@ -9,7 +9,7 @@ volatile uint8_t peek(uint32_t address) {
 
 // Определение максимального объема памяти бинарным поиском
 // Максимальное количество итерации ~24
-void memory_size() {
+void init_memory_size() {
 
     int8_t*  m   = (int8_t*)1;
     uint32_t max = 0xDFFFFFFF;

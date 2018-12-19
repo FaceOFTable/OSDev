@@ -87,7 +87,7 @@ void irq_make(uint32_t id, void* ptr, uint8_t attrb) {
 }
 
 // Инициализация Interrupt Service Routines
-void irq_init(int bitmask) {
+void init_irq(int bitmask) {
 
     int i;
 

@@ -4,11 +4,25 @@
 
 #include "canvas.h"
 
+// Установка курсора
+void at(int x, int y) {
+
+    cursor.x = x;
+    cursor.y = y;
+}
+
 // Цвета курсора
-void cursor_color(int frcolor, int bgcolor) {
+void color(int frcolor, int bgcolor) {
 
     cursor.frcolor = frcolor;
     cursor.bgcolor = bgcolor;
+}
+
+// Комбинированно
+void colorat(int x, int y, int fr, int bg) {
+
+    at(x, y);
+    color(fr, bg);
 }
 
 // Проверка на наличие МЫШИ в данной точке
@@ -19,7 +33,7 @@ unsigned char point(int x, int y) {
 
     // Возможно, тут находится МЫШЬ
     if (mx <= x && x < mx + 12 && my <= y && y < my + 21) {
-        
+
         int xn = x - mx;
 
         // Выбор точки и получение цвета
@@ -214,12 +228,37 @@ int print(char* m) {
 
 /** Печать строки по по (X,Y)
  */
-int print_xy(char* m, int x, int y) {
+int print_at(int x, int y, char* m) {
 
     cursor.x = x;
     cursor.y = y;
 
     return print(m);
+}
+
+// Печать hex-символа
+void print_hex8(uint8_t hex) {
+
+    char ht[3];
+
+    ht[0] = (hex & 0xF0) >> 4;
+    ht[1] = (hex & 0x0F);
+    ht[2] = 0;
+
+    ht[0] = ht[0] < 10 ? '0' + ht[0] : '7' + ht[0];
+    ht[1] = ht[1] < 10 ? '0' + ht[1] : '7' + ht[1];
+
+    print(ht);
+}
+void print_hex16(uint16_t hex) {
+
+    print_hex8(hex >> 8);
+    print_hex8(hex);
+}
+void print_hex32(uint32_t hex) {
+
+    print_hex16(hex >> 16);
+    print_hex16(hex);
 }
 
 /** Положение мыши

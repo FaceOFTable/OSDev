@@ -24,8 +24,6 @@ void main() {
 
     init();
 
-    // найти ata в системе
-
     cls(3);
     mouse_show(1);
 
@@ -33,6 +31,17 @@ void main() {
     int win = window_create(0, 0, 640, 452, "Управление");
     window_activate(win); window_repaint(win);
     // --
+    
+    int i, j;
+    
+    for (i = 0; i < 16; i++) {
+        
+        colorat(4, i*16+32, 7, 0);
+        for (j = 0; j < 16; j++) {
+             print_hex8(drive[0].identify[j+16*i]);
+             print(" ");
+        }
+    }
 
     // char t[24]; i2a(g, t); print_xy(t, 4, 28);
 

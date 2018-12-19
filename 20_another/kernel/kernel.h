@@ -60,18 +60,18 @@ struct GDT_ptr {
 // http://neurofox.net/sasm/14_descriptor
 
 struct GDT_item {
-    
+
     uint16_t    limit;
     uint16_t    addrlo;     // 15:0  Адрес
     uint8_t     addrhl;     // 23:16 Адрес
     uint8_t     access;     //       Биты доступа и типов
     uint8_t     limithi;    // 19:16 Предел + GDXU-атрибуты
-    uint8_t     addrhh;     // 31:24 Адрес    
+    uint8_t     addrhh;     // 31:24 Адрес
 };
 
 // https://wiki.osdev.org/Task_State_Segment
 struct TSS_item {
-    
+
     /* 00 */ uint32_t link;
     /* 04 */ uint32_t esp0;
     /* 08 */ uint32_t ss0;
@@ -82,7 +82,7 @@ struct TSS_item {
     /* 1C */ uint32_t cr3;
     /* 20 */ uint32_t eip;
     /* 24 */ uint32_t eflags;
-    
+
     /* 28 */ uint32_t eax;
     /* 2C */ uint32_t ecx;
     /* 30 */ uint32_t edx;
@@ -91,7 +91,7 @@ struct TSS_item {
     /* 3C */ uint32_t ebp;
     /* 40 */ uint32_t esi;
     /* 44 */ uint32_t edi;
-    
+
     /* 48 */ uint32_t es;
     /* 4C */ uint32_t cs;
     /* 50 */ uint32_t ss;
@@ -100,7 +100,7 @@ struct TSS_item {
     /* 5C */ uint32_t gs;
     /* 60 */ uint32_t ldtr;
     /* 64 */ uint32_t iobp;
-    
+
 };
 
 // Адрес главной таблицы
