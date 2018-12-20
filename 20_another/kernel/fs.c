@@ -216,8 +216,36 @@ void fat_detect(int device_id) {
 
                 // Скопировать блок BPB2.0
                 for (j = 0; j < sizeof(struct BPB_331); j++) 
-                    ((uint8_t*)&fb->bpb331)[j] = sector[3 + j];
+                    ((uint8_t*)&fb->bpb331)[j] = sector[0x03 + j];
+                    
+                    
+                // Количество секторов
+                fb->root_dirsec = (fb->bpb331.entry_root_num * 32) / fb->bpb331.bytes2sector;
 
+                // Это FAT12/16
+                if (fb->bpb331.entry_root_num) {    
+                                    
+                    //total_sectors = fb->bpb331.count_sectors;                                    
+                } 
+                // Либо FAT32
+                else {
+                    
+                    // Скопировать блок BPB7.1
+                    for (j = 0; j < sizeof(struct BPB_71); j++) 
+                        ((uint8_t*)&fb->bpb71)[j] = sector[0x24 + j];
+                        
+                    // Общий размер FAT, кластеры и откуда fat начинается
+                    fb->fat_size     = fb->bpb71.fat_sectors;
+                    fb->cluster_size = fb->bpb331.cluster_size;
+                    fb->fat_start    = fb->bpb331.reserved_sector;
+
+                    // Начало данных
+                    fb->data_start   = fb->bpb331.reserved_sector + (fb->bpb331.fat_count * fb->fat_size) + fb->root_dirsec;
+                    
+                    // Количество секторов в данных                
+                    fb->data_sectors = fb->bpb331.total_sectors - fb->data_start;              
+                }
+                
                 fat_found++;
                 break;
         }

@@ -36,6 +36,21 @@ struct DEVICE {
     uint8_t  identify[512]; // Информация от устройства
 };
 
+// Блок раздела
+struct __attribute__((__packed__)) MBR_BLOCK {
+    
+    uint8_t   active;
+    uint8_t   start_head;
+    uint8_t   start_sector;
+    uint8_t   start_cylinder;
+    uint8_t   type;
+    uint8_t   end_head;
+    uint8_t   end_sector;
+    uint8_t   end_cylinder;
+    uint32_t  lba_start;
+    uint32_t  lba_limit;    
+};
+
 // https://ru.wikipedia.org/wiki/%D0%91%D0%BB%D0%BE%D0%BA_%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D0%BE%D0%B2_BIOS
 
 // Крайне важно установить упакованные атрибуты здесь
@@ -57,40 +72,45 @@ struct __attribute__((__packed__)) BPB_331 {
     uint16_t  physical_heads;       // Количество головок
     uint32_t  hidden_sectors;       // Скрытых секторов
     uint32_t  total_sectors;        // Всего логических секторов
+};
+
+// FAT32 блок
+struct __attribute__((__packed__)) BPB_71 {
+    
+    uint32_t  fat_sectors;
+    uint8_t   flags1;
+    uint8_t   flags2;
+    uint16_t  version;
+    uint32_t  root_dir;             // Корневой каталог в кластерах
+    uint16_t  fsi;                  // Расположение FSI-структур
+    uint16_t  reserved_sectors;     // Расположение резервных секторов
+    uint8_t   reserved[12];         // Зарезервировано (имя файла загрузки)
+    uint8_t   drive_num;            // Номер физического диска
+    uint8_t   flags;
+    uint8_t   extboot;
+    uint32_t  volume;
     
 };
 
 // Блок файловой системы
 struct FAT_BLOCK {
 
-    uint8_t   fs_type;      // Тип файловой системы
-    uint8_t   device_id;    // Где была найдена, device_id=[1..4] -- ATA, 0-не найдено
-    uint32_t  lba_start;    // Стартовый сектор fs
-    uint32_t  lba_limit;    // Длина раздела
-    uint16_t  cluster_size; // Секторов в кластере
-    uint32_t  data_start;   // Стартовый сектор данных
-    uint32_t  fat_start;    // Старт FAT
-    uint32_t  fat_count;    // Количество
+    uint8_t   fs_type;       // Тип файловой системы
+    uint8_t   device_id;     // Где была найдена, device_id=[1..4] -- ATA, 0-не найдено
+    uint32_t  lba_start;     // Стартовый сектор fs
+    uint32_t  lba_limit;     // Длина раздела
+
+    // Информация о FAT
+    uint16_t  root_dirsec;   // Количество секторов в ROOT
+    uint16_t  cluster_size;  // Секторов в кластере
+    uint32_t  data_start;    // Стартовый сектор данных
+    uint32_t  data_sectors;  // Всего секторов в данных
+    uint32_t  fat_start;     // Старт FAT
+    uint32_t  fat_size;      // Размер FAT в секторах
     
     struct BPB_331 bpb331;
-    //struct BPB_40  bpb40; // FAT12/16/HPFS
-    //struct BPB_71  bpb71; // FAT32
-};
-
-
-// Блок раздела
-struct MBR_BLOCK {
-    
-    uint8_t   active;
-    uint8_t   start_head;
-    uint8_t   start_sector;
-    uint8_t   start_cylinder;
-    uint8_t   type;
-    uint8_t   end_head;
-    uint8_t   end_sector;
-    uint8_t   end_cylinder;
-    uint32_t  lba_start;
-    uint32_t  lba_limit;    
+    struct BPB_71  bpb71;    // FAT32
+    //struct BPB_40  bpb40;  // FAT12/16/HPFS -- пока нет у меня
 };
 
 // ---------------------------------------

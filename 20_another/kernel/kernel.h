@@ -36,7 +36,7 @@ void delay();
 #define uint64_t    unsigned long long
 
 // 64-х битный дескриптор прерывания
-struct IDT_Item {
+struct __attribute__((__packed__)) IDT_Item {
 
     uint16_t low_addr;
     uint16_t selector;
@@ -50,7 +50,7 @@ struct IDT_Item {
 #define TYPE_TSS_AVAIL   0x09
 
 // Указатель на GDT
-struct GDT_ptr {
+struct __attribute__((__packed__)) GDT_ptr {
 
     unsigned short limit;
     unsigned int   base;
@@ -59,7 +59,7 @@ struct GDT_ptr {
 // Один указатель на GDT
 // http://neurofox.net/sasm/14_descriptor
 
-struct GDT_item {
+struct __attribute__((__packed__)) GDT_item {
 
     uint16_t    limit;
     uint16_t    addrlo;     // 15:0  Адрес
@@ -69,43 +69,8 @@ struct GDT_item {
     uint8_t     addrhh;     // 31:24 Адрес
 };
 
-// https://wiki.osdev.org/Task_State_Segment
-struct TSS_item {
-
-    /* 00 */ uint32_t link;
-    /* 04 */ uint32_t esp0;
-    /* 08 */ uint32_t ss0;
-    /* 0C */ uint32_t esp1;
-    /* 10 */ uint32_t ss1;
-    /* 14 */ uint32_t esp2;
-    /* 18 */ uint32_t ss2;
-    /* 1C */ uint32_t cr3;
-    /* 20 */ uint32_t eip;
-    /* 24 */ uint32_t eflags;
-
-    /* 28 */ uint32_t eax;
-    /* 2C */ uint32_t ecx;
-    /* 30 */ uint32_t edx;
-    /* 34 */ uint32_t ebx;
-    /* 38 */ uint32_t esp;
-    /* 3C */ uint32_t ebp;
-    /* 40 */ uint32_t esi;
-    /* 44 */ uint32_t edi;
-
-    /* 48 */ uint32_t es;
-    /* 4C */ uint32_t cs;
-    /* 50 */ uint32_t ss;
-    /* 54 */ uint32_t ds;
-    /* 58 */ uint32_t fs;
-    /* 5C */ uint32_t gs;
-    /* 60 */ uint32_t ldtr;
-    /* 64 */ uint32_t iobp;
-
-};
-
 // Адрес главной таблицы
 struct GDT_item* GDT;
-struct TSS_item* TSS_Main;
 
 // Адреса PIC 8086/88
 // ---------------------------------------------------------------------

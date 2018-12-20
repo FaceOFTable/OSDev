@@ -1,5 +1,6 @@
 
 #include "kernel/kernel.h"
+#include "kernel/task.h"
 #include "kernel/fs.h"
 #include "kernel/core.h"
 
@@ -16,8 +17,8 @@
 #include "kernel/fs.c"
 #include "kernel/mm.c"
 #include "kernel/pic.c"
-#include "kernel/core.c"
 #include "kernel/task.c"
+#include "kernel/core.c"
 
 // ---------------------------------------------------------------------
 
@@ -39,19 +40,11 @@ void main() {
     
     colorat(4,30,0,-1); 
     
-    at(4,30);      print_int(fatfs[0].bpb331.bytes2sector);
-    at(4,30+1*16); print_int(fatfs[0].bpb331.cluster_size);
-    at(4,30+2*16); print_int(fatfs[0].bpb331.reserved_sector);
-    at(4,30+3*16); print_int(fatfs[0].bpb331.fat_count);
-    at(4,30+4*16); print_int(fatfs[0].bpb331.entry_root_num);
-    at(4,30+5*16); print_int(fatfs[0].bpb331.count_sectors);
-    at(4,30+6*16); print_int(fatfs[0].bpb331.media_type);
-    at(4,30+7*16); print_int(fatfs[0].bpb331.fat_sectors);
-    
-    at(4,30+9*16); print_int(fatfs[0].bpb331.physical_sectors);
-    at(4,30+10*16); print_int(fatfs[0].bpb331.physical_heads);
-    at(4,30+11*16); print_int(fatfs[0].bpb331.hidden_sectors);
-    at(4,30+12*16); print_int(fatfs[0].bpb331.total_sectors);
+    at(4,30);      print_int(fatfs[0].cluster_size);
+    at(4,30+1*16); print_int(fatfs[0].fat_size);
+    at(4,30+2*16); print_int(fatfs[0].data_start);
+    //at(4,30+2*16); print_int(fatfs[0].data_sectors);
+    at(4,30+3*16); print_int(fatfs[0].data_sectors);
     
     /*    
     for (k = 0x800; k <= 0x800; k++) {
