@@ -29,14 +29,10 @@ void main() {
     cls(3);
     mouse_show(1);
     
-    fs_open(0);
+    fs_open_root(0);
+    int m = fs_find("coreboot.bin");
     
-    //
-    // fs_open() -- открыть корневой каталог в фс
-    // fs_rewind() -- перейти к первому файлу
-    // fs_next() -- перейти к следующему (если есть, то =1)
-    // fs_find() -- найти файл в каталоге
-    // fs_enter() -- зайти в каталог
+    
     
     // fopen()
     // fseek()
@@ -56,7 +52,8 @@ void main() {
     
     colorat(4,30,0,-1); 
     
-    at(4,30+0*16); print_int(fatfs[0].root_cluster);
+    at(4,30+0*16); print_int(m);
+    at(4,30+1*16); print((char*)fs.filename);
     
     /*    
     for (k = 0x800; k <= 0x800; k++) {

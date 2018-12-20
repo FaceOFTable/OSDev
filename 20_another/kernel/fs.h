@@ -132,7 +132,6 @@ struct __attribute__((__packed__)) FAT_ITEM {
     uint16_t  wrtdate;          // Дата последней записи в файл
     uint16_t  fstcluslo;        // Номер первого кластера файла (LO)
     uint32_t  filesize;         // Размер файла
-    
 };
 
 // Текущий элемент каталога
@@ -140,10 +139,23 @@ struct FS_CURRENT {
 
     int       fs_id;                // Выбранная fatfs[ fs_id ]
     uint32_t  dir_root;             // Кластер с корневым каталогом
-    uint32_t  dir_cur;              // Кластер текущей директории
+    uint32_t  dir;                  // Кластер текущей директории
     uint32_t  cur_cluster;          // Текущий просматриваемый кластер (позиция на диске)
     uint16_t  cur_item;             // Текущий просматриваемый элемент (в кластере, 0..n-1)
+    uint16_t  cnt_item;             // Количество элементов в кластере
+    uint8_t   filename[12];         // 8.3 запрошенное имя
     struct FAT_ITEM items[2048];    // Элементы кластера 2048 x 32 = 64Kb
+};
+
+// Открытый файл
+struct File {
+    
+    int       fs_id;                // Указатель fatfs[ fs_id ]    
+    uint32_t  dir;                  // Указатель на директорию, откуда получен файл
+    uint32_t  cluster_first;        // Стартовый кластер
+    uint32_t  cluster_current;      // Текущий кластер
+    uint32_t  seek;                 // Позиция курсора в файле    
+    struct FAT_ITEM file;           // Информация о файле    
 };
 
 // ---------------------------------------

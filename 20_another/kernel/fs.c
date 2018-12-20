@@ -283,34 +283,152 @@ void fs_update_cluster() {
 
     struct FAT_BLOCK* fb = & fatfs[ fs.fs_id ];
 
-    // Устройство
-    int device_id = fb->device_id;
-
     // Найти данные
-    int lba = fb->lba_start + fb->data_start + (fs.cur_cluster - 2) * fb->cluster_size;
+    uint32_t lba = fb->lba_start + fb->data_start + (fs.cur_cluster - 2) * fb->cluster_size;
+
+    // Вычислить кол-во элементов в кластере
+    fs.cnt_item = ((fb->cluster_size<<4));
 
     // Загрузка кластера
-    drive_read_sectors((uint8_t*)fs.items, device_id, lba, fb->cluster_size);
+    drive_read_sectors((uint8_t*)fs.items, fb->device_id, lba, fb->cluster_size);
 }
 
-// Сброс всех параметров
+// По текущему кластеру найти еще кластер FAT32
+int fs_get_next_cluster32(uint32_t cluster) {
+
+    uint32_t sector[128];
+
+    struct FAT_BLOCK* fb = & fatfs[ fs.fs_id ];
+
+    // 128 кластеров (4 байта на кластер) вмещается в сектор
+    uint32_t lba = fb->lba_start + fb->fat_start + (fs.cur_cluster >> 7);
+
+    // Загрузка сектора в память
+    drive_read_sectors((uint8_t*)sector, fb->device_id, lba, 1);
+
+    // Следующий кластер будет:
+    return sector[ cluster & 0x7F ];
+}
+
+// Сброс в начало каталога
 void fs_rewind() {
 
-    fs.cur_cluster = fs.dir_cur;
+    // Не сбрасывать, есть равно
+    if (fs.dir == fs.cur_cluster)
+        return;
+
+    fs.cur_cluster = fs.dir;
     fs.cur_item    = 0;
     fs_update_cluster();
 }
 
 // Открыть корневой каталог и установить его текущим,
 // по номеру FS: fs_id = [0..15]
-void fs_open(int fs_id) {
+void fs_open_root(int fs_id) {
 
-    fs.fs_id = fs_id;
-
-    // Найти 1-й кластер у FS
-    fs.dir_root = fatfs[ fs_id ].root_cluster;
-    fs.dir_cur  = fs.dir_root;
-
-    // Перемотать на первый кластер, сектор и файл
-    fs_rewind();
+    fs.fs_id        = fs_id; // Для запросов на девайс
+    fs.dir_root     = fatfs[ fs_id ].root_cluster;   // Установка корневого
+    fs.dir          = fs.dir_root;      // Текущий каталог = корневой
+    fs.cur_cluster  = 0;    // Текущий кластер = 0, чтобы потом перезагрузился    
+    fs_rewind();            // Перемотать на первый кластер, сектор и файл
 }
+
+// Переход к следующему элементу
+// Если переход возможен, то ответ будет =1
+int fs_next() {
+
+    fs.cur_item++;
+
+    // Найти следуюший кластер
+    if (fs.cur_item >= fs.cnt_item) {
+
+        // Получение нового кластера
+        uint32_t nc = fs_get_next_cluster32(fs.cur_cluster);
+
+        // Это был последний кластер, продолжения нет
+        if (nc >= 0x0FFFFFF0) {
+
+            return 0;
+
+        } else {
+
+            fs.cur_cluster = nc;
+            fs.cur_item = 0;
+            fs_update_cluster();
+        }
+    }
+
+    return 1;
+}
+
+// Нормализовать к виду 8.3 имя файла
+void fs_normalize(const char* name) {
+
+    int i, c, o = 0;
+
+    for (i = 0; i < 11; i++) fs.filename[i] = ' ';
+
+    // Просмотр имени
+    for (i = 0; i < 13; i++) {
+
+        c = name[i];
+
+        if (c == 0)
+            return;
+
+        // Перевод нижнего в верхний регистр
+        if (c >= 'a' && c <= 'z')
+            c -= 0x20;
+
+        if (c == '.') {
+            o = 8;
+
+        } else {
+            fs.filename[o] = c; o++;
+        }
+    }
+
+    fs.filename[11] = 0;
+}
+
+// Сравнить имена 8.3 (11 символов)
+int fs_cmpname83(char* s, char* d) {
+
+    int i;
+    for (i = 0; i < 11; i++) {
+
+        if (s[i] != d[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+// Найти файл в текущей директории
+int fs_find(char* name) {
+
+    int i;
+
+    fs_normalize(name);     // Нормализовать для начала
+    fs_rewind();            // Сброс на начало каталога
+
+    do {
+
+        struct FAT_ITEM * item = & fs.items[ fs.cur_item ];
+
+        // Ничего не найдено
+        if (item->name[0] == 0) {
+            return 0;
+        }
+
+        // Сверить имя файла
+        if (fs_cmpname83((char*)item->name, (char*)fs.filename)) {
+            return 1 + fs.cur_item;
+        }
+
+    } while (fs_next());
+
+    return 0;
+}
+
