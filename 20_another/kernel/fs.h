@@ -36,6 +36,30 @@ struct DEVICE {
     uint8_t  identify[512]; // Информация от устройства
 };
 
+// https://ru.wikipedia.org/wiki/%D0%91%D0%BB%D0%BE%D0%BA_%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D0%BE%D0%B2_BIOS
+
+// Крайне важно установить упакованные атрибуты здесь
+struct __attribute__((__packed__)) BPB_331 {
+    
+    // BPB 2.0
+    uint8_t   volume[8];            // 8: Метка диска
+    uint16_t  bytes2sector;         // 2: 512
+    uint8_t   cluster_size;         // 1: Логических секторов в кластере
+    uint16_t  reserved_sector;      // 2: Зарезервированых секторов
+    uint8_t   fat_count;            // 1: Количество таблиц FAT
+    uint16_t  entry_root_num;       // 2: Количество элементов корневого каталога
+    uint16_t  count_sectors;        // 2: Количество секторов
+    uint8_t   media_type;           // 1: Тип носителя
+    uint16_t  fat_sectors;          // 2: Логических секторов в FAT
+    
+    // BPB 3.3.1
+    uint16_t  physical_sectors;     // Физические секторов на дорожке
+    uint16_t  physical_heads;       // Количество головок
+    uint32_t  hidden_sectors;       // Скрытых секторов
+    uint32_t  total_sectors;        // Всего логических секторов
+    
+};
+
 // Блок файловой системы
 struct FAT_BLOCK {
 
@@ -47,8 +71,12 @@ struct FAT_BLOCK {
     uint32_t  data_start;   // Стартовый сектор данных
     uint32_t  fat_start;    // Старт FAT
     uint32_t  fat_count;    // Количество
-    uint8_t   volume[12];   // Метка диска
+    
+    struct BPB_331 bpb331;
+    //struct BPB_40  bpb40; // FAT12/16/HPFS
+    //struct BPB_71  bpb71; // FAT32
 };
+
 
 // Блок раздела
 struct MBR_BLOCK {

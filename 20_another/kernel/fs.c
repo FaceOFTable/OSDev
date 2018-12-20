@@ -214,8 +214,9 @@ void fat_detect(int device_id) {
                 // Дальнейшее сканирование сектора FAT
                 drive_read_sectors(sector, device_id, fb->lba_start, 1);
 
-                // Считывание volume label
-                for (j = 0; j < 11; j++) fb->volume[j] = sector[3 + j]; fb->volume[11] = 0;
+                // Скопировать блок BPB2.0
+                for (j = 0; j < sizeof(struct BPB_331); j++) 
+                    ((uint8_t*)&fb->bpb331)[j] = sector[3 + j];
 
                 fat_found++;
                 break;

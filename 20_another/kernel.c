@@ -37,7 +37,21 @@ void main() {
     
     uint8_t sector[512];
     
-    colorat(4,30,0,-1); print((char*)fatfs[0].volume);
+    colorat(4,30,0,-1); 
+    
+    at(4,30);      print_int(fatfs[0].bpb331.bytes2sector);
+    at(4,30+1*16); print_int(fatfs[0].bpb331.cluster_size);
+    at(4,30+2*16); print_int(fatfs[0].bpb331.reserved_sector);
+    at(4,30+3*16); print_int(fatfs[0].bpb331.fat_count);
+    at(4,30+4*16); print_int(fatfs[0].bpb331.entry_root_num);
+    at(4,30+5*16); print_int(fatfs[0].bpb331.count_sectors);
+    at(4,30+6*16); print_int(fatfs[0].bpb331.media_type);
+    at(4,30+7*16); print_int(fatfs[0].bpb331.fat_sectors);
+    
+    at(4,30+9*16); print_int(fatfs[0].bpb331.physical_sectors);
+    at(4,30+10*16); print_int(fatfs[0].bpb331.physical_heads);
+    at(4,30+11*16); print_int(fatfs[0].bpb331.hidden_sectors);
+    at(4,30+12*16); print_int(fatfs[0].bpb331.total_sectors);
     
     /*    
     for (k = 0x800; k <= 0x800; k++) {
