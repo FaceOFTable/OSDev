@@ -38,7 +38,7 @@ struct DEVICE {
 
 // Блок раздела
 struct __attribute__((__packed__)) MBR_BLOCK {
-    
+
     uint8_t   active;
     uint8_t   start_head;
     uint8_t   start_sector;
@@ -48,14 +48,14 @@ struct __attribute__((__packed__)) MBR_BLOCK {
     uint8_t   end_sector;
     uint8_t   end_cylinder;
     uint32_t  lba_start;
-    uint32_t  lba_limit;    
+    uint32_t  lba_limit;
 };
 
 // https://ru.wikipedia.org/wiki/%D0%91%D0%BB%D0%BE%D0%BA_%D0%BF%D0%B0%D1%80%D0%B0%D0%BC%D0%B5%D1%82%D1%80%D0%BE%D0%B2_BIOS
 
 // Крайне важно установить упакованные атрибуты здесь
 struct __attribute__((__packed__)) BPB_331 {
-    
+
     // BPB 2.0
     uint8_t   volume[8];            // 8: Метка диска
     uint16_t  bytes2sector;         // 2: 512
@@ -66,7 +66,7 @@ struct __attribute__((__packed__)) BPB_331 {
     uint16_t  count_sectors;        // 2: Количество секторов
     uint8_t   media_type;           // 1: Тип носителя
     uint16_t  fat_sectors;          // 2: Логических секторов в FAT
-    
+
     // BPB 3.3.1
     uint16_t  physical_sectors;     // Физические секторов на дорожке
     uint16_t  physical_heads;       // Количество головок
@@ -76,7 +76,7 @@ struct __attribute__((__packed__)) BPB_331 {
 
 // FAT32 блок
 struct __attribute__((__packed__)) BPB_71 {
-    
+
     uint32_t  fat_sectors;
     uint8_t   flags1;
     uint8_t   flags2;
@@ -89,28 +89,61 @@ struct __attribute__((__packed__)) BPB_71 {
     uint8_t   flags;
     uint8_t   extboot;
     uint32_t  volume;
-    
+    uint8_t   label[11];
+    uint8_t   filetype[8];
+
 };
 
 // Блок файловой системы
 struct FAT_BLOCK {
 
-    uint8_t   fs_type;       // Тип файловой системы
-    uint8_t   device_id;     // Где была найдена, device_id=[1..4] -- ATA, 0-не найдено
-    uint32_t  lba_start;     // Стартовый сектор fs
-    uint32_t  lba_limit;     // Длина раздела
+    uint8_t   fs_type;          // Тип файловой системы
+    uint8_t   device_id;        // Где была найдена, device_id=[1..4] -- ATA, 0-не найдено
+    uint32_t  lba_start;        // Стартовый сектор fs
+    uint32_t  lba_limit;        // Длина раздела
 
     // Информация о FAT
-    uint16_t  root_dirsec;   // Количество секторов в ROOT
-    uint16_t  cluster_size;  // Секторов в кластере
-    uint32_t  data_start;    // Стартовый сектор данных
-    uint32_t  data_sectors;  // Всего секторов в данных
-    uint32_t  fat_start;     // Старт FAT
-    uint32_t  fat_size;      // Размер FAT в секторах
-    
+    uint16_t  root_dirsec;      // Количество секторов в ROOT
+    uint16_t  root_cluster;     // Кластер корневой директории FAT32
+    uint16_t  cluster_size;     // Количество секторов в кластере
+    uint32_t  data_start;       // Стартовый сектор данных
+    uint32_t  data_sectors;     // Всего секторов в данных
+    uint32_t  fat_start;        // Старт FAT
+    uint32_t  fat_size;         // Размер FAT в секторах
+
     struct BPB_331 bpb331;
-    struct BPB_71  bpb71;    // FAT32
-    //struct BPB_40  bpb40;  // FAT12/16/HPFS -- пока нет у меня
+    struct BPB_71  bpb71;       // FAT32
+    //struct BPB_40  bpb40;     // FAT12/16/HPFS -- пока нет у меня
+};
+
+// Структура одного элемента 
+struct __attribute__((__packed__)) FAT_ITEM {
+    
+    uint8_t   name[11];
+    uint8_t   attr;
+    uint8_t   ntres;            // Windows NT
+    uint8_t   crttime_tenth;    // Счётчик десятков миллисекунд времени создания файла, значения 0-199
+    uint16_t  crttime;          // Время создания файла с точностью до 2 секунд.
+    
+    uint16_t  crtdate;          // Дата создания файла.
+    uint16_t  lstaccdate;       // Дата последнего доступа к файлу
+    uint16_t  fstclushi;        // Номер первого кластера файла (HI)
+    uint16_t  wrttime;          // Время последней записи в файл
+    uint16_t  wrtdate;          // Дата последней записи в файл
+    uint16_t  fstcluslo;        // Номер первого кластера файла (LO)
+    uint32_t  filesize;         // Размер файла
+    
+};
+
+// Текущий элемент каталога
+struct FS_CURRENT {
+
+    int       fs_id;                // Выбранная fatfs[ fs_id ]
+    uint32_t  dir_root;             // Кластер с корневым каталогом
+    uint32_t  dir_cur;              // Кластер текущей директории
+    uint32_t  cur_cluster;          // Текущий просматриваемый кластер (позиция на диске)
+    uint16_t  cur_item;             // Текущий просматриваемый элемент (в кластере, 0..n-1)
+    struct FAT_ITEM items[2048];    // Элементы кластера 2048 x 32 = 64Kb
 };
 
 // ---------------------------------------
@@ -118,5 +151,6 @@ struct FAT_BLOCK {
 int fat_found;  // Количество найденных FAT
 
 // Список драйвов
-struct DEVICE    drive[4];  // 4 канала
-struct FAT_BLOCK fatfs[16]; // До 16 файловых систем на 4 разделах
+struct DEVICE     drive[4];  // 4 канала
+struct FAT_BLOCK  fatfs[16]; // До 16 файловых систем на 4 разделах
+struct FS_CURRENT fs;        // Текущий статус

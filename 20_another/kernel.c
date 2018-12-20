@@ -1,7 +1,7 @@
 
 #include "kernel/kernel.h"
-#include "kernel/task.h"
 #include "kernel/fs.h"
+#include "kernel/task.h"
 #include "kernel/core.h"
 
 // Графика
@@ -28,6 +28,22 @@ void main() {
 
     cls(3);
     mouse_show(1);
+    
+    fs_open(0);
+    
+    //
+    // fs_open() -- открыть корневой каталог в фс
+    // fs_rewind() -- перейти к первому файлу
+    // fs_next() -- перейти к следующему (если есть, то =1)
+    // fs_find() -- найти файл в каталоге
+    // fs_enter() -- зайти в каталог
+    
+    // fopen()
+    // fseek()
+    // ftell()
+    // fread() | fwrite()
+    // fclose()
+    
 
     // --
     int win = window_create(0, 0, 640, 452, "Управление");
@@ -40,11 +56,7 @@ void main() {
     
     colorat(4,30,0,-1); 
     
-    at(4,30);      print_int(fatfs[0].cluster_size);
-    at(4,30+1*16); print_int(fatfs[0].fat_size);
-    at(4,30+2*16); print_int(fatfs[0].data_start);
-    //at(4,30+2*16); print_int(fatfs[0].data_sectors);
-    at(4,30+3*16); print_int(fatfs[0].data_sectors);
+    at(4,30+0*16); print_int(fatfs[0].root_cluster);
     
     /*    
     for (k = 0x800; k <= 0x800; k++) {

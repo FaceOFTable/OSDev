@@ -215,25 +215,25 @@ void fat_detect(int device_id) {
                 drive_read_sectors(sector, device_id, fb->lba_start, 1);
 
                 // Скопировать блок BPB2.0
-                for (j = 0; j < sizeof(struct BPB_331); j++) 
+                for (j = 0; j < sizeof(struct BPB_331); j++)
                     ((uint8_t*)&fb->bpb331)[j] = sector[0x03 + j];
-                    
-                    
+
+
                 // Количество секторов
                 fb->root_dirsec = (fb->bpb331.entry_root_num * 32) / fb->bpb331.bytes2sector;
 
-                // Это FAT12/16
-                if (fb->bpb331.entry_root_num) {    
-                                    
-                    //total_sectors = fb->bpb331.count_sectors;                                    
-                } 
+                // Это FAT12/16 -- пока никак не обрабатываем
+                if (fb->bpb331.entry_root_num) {
+
+                    //total_sectors = fb->bpb331.count_sectors;
+                }
                 // Либо FAT32
                 else {
-                    
+
                     // Скопировать блок BPB7.1
-                    for (j = 0; j < sizeof(struct BPB_71); j++) 
+                    for (j = 0; j < sizeof(struct BPB_71); j++)
                         ((uint8_t*)&fb->bpb71)[j] = sector[0x24 + j];
-                        
+
                     // Общий размер FAT, кластеры и откуда fat начинается
                     fb->fat_size     = fb->bpb71.fat_sectors;
                     fb->cluster_size = fb->bpb331.cluster_size;
@@ -241,12 +241,16 @@ void fat_detect(int device_id) {
 
                     // Начало данных
                     fb->data_start   = fb->bpb331.reserved_sector + (fb->bpb331.fat_count * fb->fat_size) + fb->root_dirsec;
-                    
-                    // Количество секторов в данных                
-                    fb->data_sectors = fb->bpb331.total_sectors - fb->data_start;              
+
+                    // Количество секторов в данных
+                    fb->data_sectors = fb->bpb331.total_sectors - fb->data_start;
+
+                    // Корневой кластер
+                    fb->root_cluster = fb->bpb71.root_dir;
+
+                    fat_found++;
                 }
-                
-                fat_found++;
+
                 break;
         }
     }
@@ -272,4 +276,41 @@ void init_ata_drives() {
             fat_detect(device_id);
         }
     }
+}
+
+// Загрузка кластера для `fs.cur_cluster`
+void fs_update_cluster() {
+
+    struct FAT_BLOCK* fb = & fatfs[ fs.fs_id ];
+
+    // Устройство
+    int device_id = fb->device_id;
+
+    // Найти данные
+    int lba = fb->lba_start + fb->data_start + (fs.cur_cluster - 2) * fb->cluster_size;
+
+    // Загрузка кластера
+    drive_read_sectors((uint8_t*)fs.items, device_id, lba, fb->cluster_size);
+}
+
+// Сброс всех параметров
+void fs_rewind() {
+
+    fs.cur_cluster = fs.dir_cur;
+    fs.cur_item    = 0;
+    fs_update_cluster();
+}
+
+// Открыть корневой каталог и установить его текущим,
+// по номеру FS: fs_id = [0..15]
+void fs_open(int fs_id) {
+
+    fs.fs_id = fs_id;
+
+    // Найти 1-й кластер у FS
+    fs.dir_root = fatfs[ fs_id ].root_cluster;
+    fs.dir_cur  = fs.dir_root;
+
+    // Перемотать на первый кластер, сектор и файл
+    fs_rewind();
 }
