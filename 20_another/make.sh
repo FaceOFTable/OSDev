@@ -2,6 +2,7 @@
 
 # sudo mount disk.img -t vfat -o loop,rw,uid="`whoami`",sync,offset=$[1048576] disk
 # sudo mount floppy.img -t vfat -o loop,rw,uid="`whoami`",sync,offset=$[0] floppy 
+# qemu-system-i386 -drive format=raw,file=disk.img
 
 # Для kernel.c
 if (nasm -felf32 -o startup.o startup.asm)

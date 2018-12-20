@@ -47,6 +47,7 @@ struct FAT_BLOCK {
     uint32_t  data_start;   // Стартовый сектор данных
     uint32_t  fat_start;    // Старт FAT
     uint32_t  fat_count;    // Количество
+    uint8_t   volume[12];   // Метка диска
 };
 
 // Блок раздела
@@ -61,7 +62,7 @@ struct MBR_BLOCK {
     uint8_t   end_sector;
     uint8_t   end_cylinder;
     uint32_t  lba_start;
-    uint32_t  count;    
+    uint32_t  lba_limit;    
 };
 
 // ---------------------------------------

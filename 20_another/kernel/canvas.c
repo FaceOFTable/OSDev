@@ -263,9 +263,9 @@ void print_hex32(uint32_t hex) {
 
 // Печать числа
 void print_int(int data) {
-    
-    char tmp[24];     
-    
+
+    char tmp[24];
+
     i2a(data, tmp);
     print(tmp);
 }

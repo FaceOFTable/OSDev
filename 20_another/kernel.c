@@ -33,22 +33,35 @@ void main() {
     window_activate(win); window_repaint(win);
     // --
     
-    int i, j;
-    /*
-    for (i = 0; i < 16; i++) {
+    int i, j, k;
+    
+    uint8_t sector[512];
+    
+    colorat(4,30,0,-1); print((char*)fatfs[0].volume);
+    
+    /*    
+    for (k = 0x800; k <= 0x800; k++) {
+    
+        if (drive_read_sectors(sector, 0, k, 1)) {
+            colorat(4,24,0,-1); print("ERROR READ");
+        }    
         
-        colorat(4, i*16+32, 7, 0);
-        for (j = 0; j < 16; j++) {
-             print_hex8(drive[0].identify[j+16*i]);
-             print(" ");
+        colorat(4,24,0,7); print_int(k);
+        
+        for (i = 0; i < 16; i++) {
+            colorat(4, i*16+40, 7, 1);
+            for (j = 0; j < 16; j++) {
+                 print_hex8(sector[j+16*i]);
+                 print(" ");
+                 
+                 
+                 //if (sector[j+16*i]) for(;;);
+            }
         }
+        
+        break;
     }
     */
-    
-    colorat(4,400,0,-1);
-    print_int(fat_found);
-
-    // 
 
     panel_repaint();
 

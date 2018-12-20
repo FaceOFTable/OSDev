@@ -25,8 +25,8 @@ int ata_soft_reset(int devctl) {
 // Выбор устройства для работы
 void drive_select(int slavebit, struct DEVICE* ctrl) {
 
-    // Выбор устройства (primary | slave)
-    IoWrite8(ctrl->base + REG_DEVSEL, 0xA0 | slavebit << 4);
+    // Выбор устройства (primary | slave) | 0x40=Set LBA Bit
+    IoWrite8(ctrl->base + REG_DEVSEL, 0xA0 | 0x40 | slavebit << 4);
 
     // Ожидать 400ns, пока драйв включится в работу
     IoRead8(ctrl->dev_ctl);
@@ -115,12 +115,8 @@ int drive_identify(int id) {
             // Читаем 1 сектор в режиме PIO
             drive_pio_read(ctrl->base, ctrl->identify);
 
-            // Определяем стартовый сектор
-            if ((uint32_t)(*((uint32_t*)ctrl->identify + 0x5)) == 0x48444258) {
-                drive[id].start = 1;
-            } else {
-                drive[id].start = 0;
-            }
+            // Определяем стартовый сектор #0
+            drive[id].start = 0;
 
             return 1;
         }
@@ -133,19 +129,28 @@ int drive_identify(int id) {
 // command = 0x24 READ; 0x34 WRITE
 void drive_prepare_lba(int device_id, uint32_t lba, int count, int command) {
 
-    int base = drive[ device_id ].base;
+    int base   = drive[ device_id ].base;
+    int devctl = drive[ device_id ].dev_ctl;
 
-    // Коррекция BXHD
+    // Коррекция
     lba += drive[ device_id ].start;
 
-    // Выбор устройства (primary | slave)
-    drive_select(device_id & 1, &drive[ device_id ]);
+    // Выбор устройства (primary | slave) | 0x40=Set LBA Bit | LBA[27:24]
+    IoWrite8(base + REG_DEVSEL, 0xA0 | 0x40 | (device_id & 1) << 4 | ((lba >> 24) & 0xF) );
 
+    // Ожидать 400ns, пока драйв включится в работу
+    IoRead8(devctl);
+	IoRead8(devctl);
+	IoRead8(devctl);
+	IoRead8(devctl);
+
+    // Старшие разряды
     IoWrite8(base + REG_COUNT,   (count >>  8) & 0xFF);
     IoWrite8(base + REG_LBA_LO,  (lba   >> 24) & 0xFF);
     IoWrite8(base + REG_LBA_MID, 0);
     IoWrite8(base + REG_LBA_HI,  0);
 
+    // Младшие
     IoWrite8(base + REG_COUNT,   (count    ) & 0xFF);
     IoWrite8(base + REG_LBA_LO,  (lba      ) & 0xFF);
     IoWrite8(base + REG_LBA_MID, (lba >>  8) & 0xFF);
@@ -156,7 +161,7 @@ void drive_prepare_lba(int device_id, uint32_t lba, int count, int command) {
 }
 
 // Чтение сектора с выбранного ATA
-void drive_read_sectors(uint8_t* address, int device_id, int lba, int count) {
+int drive_read_sectors(uint8_t* address, int device_id, int lba, int count) {
 
     int i;
     int base = drive[ device_id ].base;
@@ -168,38 +173,54 @@ void drive_read_sectors(uint8_t* address, int device_id, int lba, int count) {
     for (i = 0; i < 4096; i++)
     if ((IoRead8(base + REG_CMD) & 0x80) == 0) {
 
-        // Читаем 1 сектор в режиме PIO
-        drive_pio_read(base, address);
-        return;
+        // При DRQ=1, ERR=0, CORR=0, IDX=0, RDY=1, DF=0
+        if ((IoRead8(base + REG_CMD) & 0x6F) == 0x48) {
+            drive_pio_read(base, address);
+            return 0;
+        }
     }
+
+    return 1;
 }
 
 // Определение FAT на устройстве
 void fat_detect(int device_id) {
 
-    int i;
+    int i, j;
     uint8_t sector[512];
 
     // Прочесть один сектор с диска для распознания MBR
     drive_read_sectors(sector, device_id, 0, 1);
-    
-    struct MBR_BLOCK* block = (struct MBR_BLOCK*)(sector + 0x1BE);
 
-    // Читаем mbr
+    struct MBR_BLOCK* block = (struct MBR_BLOCK*)(sector + 0x1BE);
+    struct FAT_BLOCK* fb;
+
+    // Читаем MBR разделы
     for (i = 0; i < 4; i++) {
-        
-        switch (block[ i ].type) {
-            
+
+        switch (block[i].type) {
+
             case FS_TYPE_FAT12:
             case FS_TYPE_FAT16:
             case FS_TYPE_FAT32:
-            
-                fatfs[ fat_found ].fs_type = block[0].type;
+
+                fb = & fatfs[ fat_found ];
+
+                fb->fs_type   = block[i].type;
+                fb->device_id = device_id;
+                fb->lba_start = block[i].lba_start;
+                fb->lba_limit = block[i].lba_limit;
+
+                // Дальнейшее сканирование сектора FAT
+                drive_read_sectors(sector, device_id, fb->lba_start, 1);
+
+                // Считывание volume label
+                for (j = 0; j < 11; j++) fb->volume[j] = sector[3 + j]; fb->volume[11] = 0;
 
                 fat_found++;
-                break;        
-        }        
-    }     
+                break;
+        }
+    }
 }
 
 // Найти ATA диски
@@ -208,7 +229,7 @@ void init_ata_drives() {
     fat_found = 0;
 
     int device_id;
-    
+
     // Перечисление 4 типов шин
     for (device_id = 0; device_id < 4; device_id++) {
 
@@ -223,4 +244,3 @@ void init_ata_drives() {
         }
     }
 }
-
