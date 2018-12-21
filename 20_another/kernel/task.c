@@ -1,7 +1,7 @@
 // Создание и переключение на главный TSS
 void init_main_task() {
 
-    TSS_Main = (struct TSS_item*)malloc(104);
+    TSS_Main = (struct TSS_item*)kalloc(104);
 
     // @todo Выделение стека разного уровня
 

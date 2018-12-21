@@ -135,6 +135,9 @@ void vga_pixel(unsigned x, unsigned y, unsigned char c) {
 void init_vga() {
 
     int i;
+    
+    // Выделить память для VGA
+    canvas = kalloc(640*480);
 
     // Режим 2 (регистр выбор режима 5)
     // -- режим записи 1 слой цвета - 1 бит

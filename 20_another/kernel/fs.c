@@ -324,12 +324,12 @@ void fs_rewind() {
 
 // Открыть корневой каталог и установить его текущим,
 // по номеру FS: fs_id = [0..15]
-void fs_open_root(int fs_id) {
+void fs_init(int fs_id) {
 
     fs.fs_id        = fs_id; // Для запросов на девайс
     fs.dir_root     = fatfs[ fs_id ].root_cluster;   // Установка корневого
     fs.dir          = fs.dir_root;      // Текущий каталог = корневой
-    fs.cur_cluster  = 0;    // Текущий кластер = 0, чтобы потом перезагрузился    
+    fs.cur_cluster  = 0;    // Текущий кластер = 0, чтобы потом перезагрузился
     fs_rewind();            // Перемотать на первый кластер, сектор и файл
 }
 
@@ -432,3 +432,8 @@ int fs_find(char* name) {
     return 0;
 }
 
+// fopen()
+// fseek()
+// ftell()
+// fread() | fwrite()
+// fclose()

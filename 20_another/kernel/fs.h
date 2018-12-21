@@ -116,15 +116,15 @@ struct FAT_BLOCK {
     //struct BPB_40  bpb40;     // FAT12/16/HPFS -- пока нет у меня
 };
 
-// Структура одного элемента 
+// Структура одного элемента
 struct __attribute__((__packed__)) FAT_ITEM {
-    
+
     uint8_t   name[11];
     uint8_t   attr;
     uint8_t   ntres;            // Windows NT
     uint8_t   crttime_tenth;    // Счётчик десятков миллисекунд времени создания файла, значения 0-199
     uint16_t  crttime;          // Время создания файла с точностью до 2 секунд.
-    
+
     uint16_t  crtdate;          // Дата создания файла.
     uint16_t  lstaccdate;       // Дата последнего доступа к файлу
     uint16_t  fstclushi;        // Номер первого кластера файла (HI)
@@ -149,13 +149,13 @@ struct FS_CURRENT {
 
 // Открытый файл
 struct File {
-    
-    int       fs_id;                // Указатель fatfs[ fs_id ]    
+
+    int       fs_id;                // Указатель fatfs[ fs_id ]
     uint32_t  dir;                  // Указатель на директорию, откуда получен файл
     uint32_t  cluster_first;        // Стартовый кластер
     uint32_t  cluster_current;      // Текущий кластер
-    uint32_t  seek;                 // Позиция курсора в файле    
-    struct FAT_ITEM file;           // Информация о файле    
+    uint32_t  seek;                 // Позиция курсора в файле
+    struct FAT_ITEM file;           // Информация о файле
 };
 
 // ---------------------------------------

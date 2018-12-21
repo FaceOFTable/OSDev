@@ -1,4 +1,3 @@
-#include "mm.h"
 
 // Получение байта из памяти
 volatile uint8_t peek(uint32_t address) {
@@ -7,9 +6,8 @@ volatile uint8_t peek(uint32_t address) {
     return t[address - 8];
 }
 
-// Определение максимального объема памяти бинарным поиском
-// Максимальное количество итерации ~24
-void init_memory_size() {
+// Определение максимального объема памяти
+void init_memory() {
 
     int8_t*  m   = (int8_t*)1;
     uint32_t max = 0xDFFFFFFF;
@@ -40,33 +38,10 @@ void init_memory_size() {
     }
 }
 
-// Выделение нового дескриптора памяти
-void* malloc(size_t size) {
+// Выделение резидентной памяти
+void* kalloc(size_t size) {
 
-    int i;
-
-    // Слишком малый размер неэффективен
-    if (size < 64)
-        size = 64;
-
-    // Нахождение "зазоров" нужного размера между ними
-    // -- если найден, вставляется между блоками памяти
-
-    // Отрезаем "кусок" памяти
-    // ----------------
-
-    // Вставляем информацию об управляющей цепи памяти
-    mem_lower -= sizeof(struct mem_chain);
-
-    struct mem_chain* cm = (struct mem_chain*)mem_lower;
-
-    // Память опускается на нужное количество байт
     mem_lower -= size;
-
-    // Запись новой информации о цепи
-    cm->size = size;      // Объем выделенных данных
-    cm->next = 0;         // Следующая точка неизвестна
-
     return (void*)mem_lower;
 }
 

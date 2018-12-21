@@ -76,7 +76,7 @@ void init_gdt() {
     uint32_t i;
 
     // Выделить системную память под новую
-    uint8_t* m = (uint8_t*)malloc(65536);
+    uint8_t* m = (uint8_t*)kalloc(65536);
 
     // Записать дальнейший адрес таблицы
     GDT = (struct GDT_item*)m;
@@ -104,7 +104,7 @@ void init() {
 
     init_irq(mask);         // Назначить обработчики IRQ
     init_ps2_mouse();       // Инициализировать мышь
-    init_memory_size();     // Определить размер памяти
+    init_memory();          // Определить размер памяти
     init_gdt();             // Инициализация
     init_main_task();       // Создание главной задачи
     init_ata_drives();      // Инициализация дисков

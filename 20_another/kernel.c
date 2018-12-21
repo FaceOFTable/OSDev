@@ -1,8 +1,10 @@
 
 #include "kernel/kernel.h"
 #include "kernel/fs.h"
+#include "kernel/mm.h"
 #include "kernel/task.h"
 #include "kernel/core.h"
+#include "kernel/canvas.h"
 
 // Графика
 #include "kernel/vga.c"
@@ -29,18 +31,9 @@ void main() {
     cls(3);
     mouse_show(1);
     
-    fs_open_root(0);
+    fs_init(0);
     int m = fs_find("coreboot.bin");
     
-    
-    
-    // fopen()
-    // fseek()
-    // ftell()
-    // fread() | fwrite()
-    // fclose()
-    
-
     // --
     int win = window_create(0, 0, 640, 452, "Управление");
     window_activate(win); window_repaint(win);

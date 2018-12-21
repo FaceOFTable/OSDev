@@ -2,8 +2,6 @@
  * @desc Слой над vga.c
  */
 
-#include "canvas.h"
-
 // Установка курсора
 void at(int x, int y) {
 
