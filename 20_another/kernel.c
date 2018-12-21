@@ -40,17 +40,18 @@ void main() {
     window_activate(win); window_repaint(win);
     // --
 
-
     int i, j, k;
 
     uint8_t sector[512];
 
     colorat(4,30,0,-1);
+
     at(4,30+0*16); print_int(m);
     at(4,30+1*16); print((char*)fs.filename);
     at(4,30+2*16); print_int((uint32_t)(mem_max - mem_lower)>>10);    
-    at(4,30+3*16); print_int((uint32_t)(mem_max)>>20);    
-    at(4,30+4*16); print_int((uint32_t)(mem_real_max)>>20);    
+    
+    // Проверить 
+    at(4,30+4*16); print_hex32( get_pte(0x7FF2000) );    
 
     panel_repaint();
 

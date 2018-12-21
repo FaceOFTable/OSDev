@@ -54,22 +54,25 @@ void init_paging() {
     // Выделить какое-то пустое пространство
     kalloc(mem_lower - aligned);
 
-    // Выделит память под PDBR Ring 0
-    uint32_t* pdbr = kalloc(4096);
+    // Выделить память под PDBR Ring 0
+    PDBR  = kalloc(4096);
+    
+    // Управляющая страница
+    CPage = kalloc(4096);
 
     // Выделить память под страницы 4mb = 4kb
-    uint32_t* pt_cats = kalloc((mem_real_max >> 10) & ~0xFFF);
+    PTE  = kalloc((mem_real_max >> 10) & ~0xFFF);
 
     // Разметка страниц PDBR 1:1
     for (i = 0; i < 1024; i++) {
 
         // Адрес каталогов страниц
-        uint32_t* ptc = pt_cats + (i << 10);
+        uint32_t* ptc = PTE + (i << 10);
 
         // Просматриваем PDBR
         if ((i << 22) < mem_real_max) {
 
-            pdbr[i] = (uint32_t)ptc | (PTE_RW | PTE_PRESENT);
+            PDBR[i] = (uint32_t)ptc | (PTE_RW | PTE_PRESENT);
 
             // Разметить страницы по 4Мб
             for (j = 0; j < 1024; j++) {
@@ -79,11 +82,11 @@ void init_paging() {
             }
         }
         // Страница пуста
-        else pdbr[i] = 0;
+        else PDBR[i] = 0;
     }
 
     // Поместить в CR3 значение PDBR
-    __asm__ __volatile__("movl %0, %%cr3"       : : "r"(pdbr) );
+    __asm__ __volatile__("movl %0, %%cr3"       : : "r"(PDBR) );
     __asm__ __volatile__("movl %%cr0, %0"       : : "r"(cr0) );
     __asm__ __volatile__("orl  $0x80000000, %0" :   "=r"(cr0) );
     __asm__ __volatile__("movl %0, %%cr0"       :   "=r"(cr0) );
@@ -113,6 +116,24 @@ void init_memory() {
     get_max_memsize();
 }
 
+// По адресу, найти PTE (Page Table Entry)
+uint32_t get_pte(uint32_t address) {
+    
+    // Получение ссылки на каталог страниц, если есть
+    uint32_t pd = PDBR[ address >> 22 ];
+    
+    // Если свободен каталог страниц
+    if ((pd & PTE_PRESENT) == 0) {
+        return 0;
+    }
+
+    pd &= ~0xFFF;                      // Найти каталог страниц
+    uint32_t* catalog = (uint32_t*)pd; // Ссылка на каталог страниц    
+    uint32_t  pte = catalog[ (address >> 12) & 0x3FF ]; // Достать PTE
+
+    return pte;    
+}
+
 // Найти свободную память и выделить ее
 void* get_free_page() {
     
@@ -122,6 +143,8 @@ void* get_free_page() {
 
 // Выделение линейного куска памяти в страничной организации в виртуальном пространстве
 void* malloc(uint32_t size) {
+    
+    // Просмотр всех доступных элементов после 8 мб
     
     void* m;
     return m;
