@@ -69,6 +69,7 @@ struct __attribute__((__packed__)) GDT_item {
     uint8_t     addrhh;     // 31:24 Адрес
 };
 
+
 // Адрес главной таблицы
 struct GDT_item* GDT;
 

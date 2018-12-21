@@ -99,7 +99,7 @@ void init_irq(int bitmask) {
     }
 
     // Назначить вектора прерываний
-    //irq_make(0x20, & IRQ_keyboard, 0x8E);
+    irq_make(0x20, & IRQ_master,   0x8E); // timer
     irq_make(0x21, & IRQ_keyboard, 0x8E);
     irq_make(0x22, & IRQ_cascade,  0x8E);
     irq_make(0x23, & IRQ_master,   0x8E);
@@ -107,7 +107,7 @@ void init_irq(int bitmask) {
     irq_make(0x25, & IRQ_master,   0x8E);
     irq_make(0x26, & IRQ_master,   0x8E);
     irq_make(0x27, & IRQ_master,   0x8E);
-    
+
     irq_make(0x27, & IRQ_slave,    0x8E);
     irq_make(0x28, & IRQ_slave,    0x8E);
     irq_make(0x29, & IRQ_slave,    0x8E);
@@ -119,7 +119,6 @@ void init_irq(int bitmask) {
     irq_make(0x2F, & IRQ_slave,    0x8E);
 
     // Обработчики Exception
-    // irq_make(0x0E, & exception_page_fault, 0x8E);
-    // irq_make(0x0D, & exception_GP_fault, 0x8E);
-
+    // irq_make(0x0E, & err_page_fault, 0x8E);
+    // irq_make(0x0D, & err_prot_fault, 0x8E);
 }

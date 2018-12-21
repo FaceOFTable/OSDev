@@ -28,6 +28,10 @@ unsigned char point(int x, int y) {
 
     int mx = cursor.mouse_x,
         my = cursor.mouse_y;
+        
+    // Не выходить за границы экрана
+    if (x < 0 || y < 0 || x > 639 || y > 479)
+        return 0;
 
     // Возможно, тут находится МЫШЬ
     if (mx <= x && x < mx + 12 && my <= y && y < my + 21) {

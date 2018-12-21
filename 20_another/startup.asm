@@ -45,9 +45,8 @@ dely:   loop    dely
 INT_null:
 
         xchg    bx, bx
-        mov     ax, bx
+        jmp     INT_null        ; !!! ERRROR !!!
         iretd
-
 
 IRQ_master:
 
