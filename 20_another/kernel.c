@@ -26,32 +26,14 @@
 
 void main() {
 
-    init();
+    init(); cls(3); mouse_show(1);
 
-    cls(3);
+    /* fs_init(0); int m = fs_find("coreboot.bin"); */
 
-    fs_init(0);
-    int m = fs_find("coreboot.bin");
+    // int win = window_create(0, 0, 640, 452, "Управление");
+    // window_activate(win); window_repaint(win);
 
-    mouse_show(1);
-
-    // --
-    int win = window_create(0, 0, 640, 452, "Управление");
-    window_activate(win); window_repaint(win);
-    // --
-
-    int i, j, k;
-
-    uint8_t sector[512];
-
-    colorat(4,30,0,-1);
-
-    at(4,30+0*16); print_int(m);
-    at(4,30+1*16); print((char*)fs.filename);
-    at(4,30+2*16); print_int((uint32_t)(mem_max - mem_lower)>>10);    
-    
-    // Проверить 
-    at(4,30+4*16); print_hex32( get_pte(0x7FF2000) );    
+    palloc(4096);
 
     panel_repaint();
 

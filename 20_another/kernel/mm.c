@@ -22,10 +22,10 @@ void get_max_memsize() {
         if ((min & 0xfffff000) + 0x1000 >= (max & 0xfffff000)) {
 
             // Настоящее количество памяти
-            mem_real_max  = (max & 0xfffff000); 
-            
+            mem_real_max  = (max & 0xfffff000);
+
             // Память ОС
-            mem_max       = mem_real_max > (SYSMEM<<20) ? (SYSMEM<<20) : mem_real_max; 
+            mem_max       = mem_real_max > (SYSMEM<<20) ? (SYSMEM<<20) : mem_real_max;
             mem_lower     = mem_max;
             break;
         }
@@ -56,7 +56,7 @@ void init_paging() {
 
     // Выделить память под PDBR Ring 0
     PDBR  = kalloc(4096);
-    
+
     // Управляющая страница
     CPage = kalloc(4096);
 
@@ -94,6 +94,36 @@ void init_paging() {
     __asm__ __volatile__("localm:");
 }
 
+// Инициализировать память
+void init_memory() {
+    get_max_memsize();
+}
+
+// По адресу, найти PTE (Page Table Entry)
+uint32_t GetPTE(uint32_t address) {
+
+    uint32_t pagedir = PDBR[ address >> 22 ];
+
+    if ((pagedir & PTE_PRESENT) == 0) {
+        return 0;
+    }
+
+    // Получить PTE (Page Table Entry)
+    return ((uint32_t*)(pagedir & ~0xFFF))[ (address >> 12) & 0x3FF ]; 
+}
+
+// Записать новое значение PTE по адресу
+void PutPTE(uint32_t address, uint32_t value) {
+
+    uint32_t pagedir = PDBR[ address >> 22 ];
+
+    if ((pagedir & PTE_PRESENT) == 0) {
+        return;
+    }
+
+    ((uint32_t*)(pagedir & ~0xFFF))[ (address >> 12) & 0x3FF ] = value;
+}
+
 // Выделение резидентной памяти
 void* kalloc(size_t size) {
 
@@ -101,51 +131,46 @@ void* kalloc(size_t size) {
     return (void*)mem_lower;
 }
 
-// Освободить память
-void free(void* ptr) {
+// Линейный страничный кусок в памяти без сохранения его размера
+void* palloc(uint32_t size) {
 
-    // ..
-}
+    int i;
+    int nofree;
 
-// Изменить размер
-void realloc(void* ptr, size_t size) {
-}
+    // Размер выделяемого пространства
+    uint32_t size_lookup = (size & ~0xfff) + (size & 0xfff ? 0x1000 : 0);
+    uint32_t cursor_start;
+    uint32_t cursor = SYSMEM << 20; // Стартовая позиция
 
-// Инициализировать память
-void init_memory() {
-    get_max_memsize();
-}
+    // Ограничение по памяти, файла подкачки нет
+    while (cursor < mem_real_max) {
 
-// По адресу, найти PTE (Page Table Entry)
-uint32_t get_pte(uint32_t address) {
-    
-    // Получение ссылки на каталог страниц, если есть
-    uint32_t pd = PDBR[ address >> 22 ];
-    
-    // Если свободен каталог страниц
-    if ((pd & PTE_PRESENT) == 0) {
-        return 0;
+        cursor_start = cursor;
+        nofree = 0;
+
+        // Просмотр плоского листинга страниц
+        for (i = 0; i < size_lookup; i += 4096) {
+
+            // Если эта страница занята, то пропустить ее
+            if (GetPTE(cursor) & PTE_USER1) { nofree = 1; break; }
+            cursor += 4096;
+        }
+
+        // Страницы были успешно выделены: занять их
+        if (nofree == 0) {
+
+            cursor = cursor_start;
+            for (i = 0; i < size_lookup; i += 4096) {
+
+                PutPTE(cursor, GetPTE(cursor) | PTE_USER1);
+                cursor += 4096;
+            }
+
+            return (void*)cursor_start;
+        }
+
+        cursor += 4096;
     }
 
-    pd &= ~0xFFF;                      // Найти каталог страниц
-    uint32_t* catalog = (uint32_t*)pd; // Ссылка на каталог страниц    
-    uint32_t  pte = catalog[ (address >> 12) & 0x3FF ]; // Достать PTE
-
-    return pte;    
-}
-
-// Найти свободную память и выделить ее
-void* get_free_page() {
-    
-    void* m;
-    return m;
-}
-
-// Выделение линейного куска памяти в страничной организации в виртуальном пространстве
-void* malloc(uint32_t size) {
-    
-    // Просмотр всех доступных элементов после 8 мб
-    
-    void* m;
-    return m;
+    return NULL;
 }

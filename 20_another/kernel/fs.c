@@ -287,7 +287,7 @@ void fs_update_cluster() {
     uint32_t lba = fb->lba_start + fb->data_start + (fs.cur_cluster - 2) * fb->cluster_size;
 
     // Вычислить кол-во элементов в кластере
-    fs.cnt_item = ((fb->cluster_size<<4));
+    fs.cnt_item = (fb->cluster_size<<4);
 
     // Загрузка кластера
     drive_read_sectors((uint8_t*)fs.items, fb->device_id, lba, fb->cluster_size);
