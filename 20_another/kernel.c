@@ -27,6 +27,10 @@
 #include "kernel/task.c"
 #include "kernel/core.c"
 
+// GDI, USER, etc
+#include "gdi/gdi.h"
+#include "gdi/gdi.c"
+
 // Некоторые "приложения"
 #include "app/desktop.c"
 #include "app/miner.c"
@@ -36,11 +40,8 @@
 
 void main() {
 
-    init(0); 
-    
-    cls(3); 
-    mouse_show(1);  
-      
+    init(0); mouse_show(1); cls(3);
+
     make_desktop();
     make_miner();
 

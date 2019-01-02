@@ -27,6 +27,8 @@ void init_windows() {
 void window_init(int id, int x, int y, int w, int h, char* title) {
 
     struct window* win = & allwin[ id ];
+    
+    h += 20; // Учет заголовка
 
     win->x1 = x;
     win->y1 = y;
@@ -35,6 +37,7 @@ void window_init(int id, int x, int y, int w, int h, char* title) {
 
     win->w = w;
     win->h = h;
+    
     win->title = title;
     win->bgcolor = 7;
 
@@ -103,8 +106,8 @@ void button(int x1, int y1, int w, int h, int pressed) {
 void window_repaint(int id) {
 
     struct window* win = & allwin[ id ];
-    
-    if (win->state != WINDOW_STATE_DEFAULT) 
+
+    if (win->state != WINDOW_STATE_DEFAULT)
         return;
 
     // Подложка
@@ -129,6 +132,10 @@ void window_repaint(int id) {
 
     button(win->x2 - 19, win->y1 + 5, 15, 14, 0);
     color(0, -1); print_at(win->x2 - 15, win->y1 + 3, "x");
+
+    // Отправка repaint
+    if (win->event_repaint)
+        win->event_repaint();
 }
 
 // Активировать новое окно

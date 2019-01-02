@@ -2,10 +2,12 @@
 // На рабочий стол было нажатие
 void desktop_mousedown() {
     
-    colorat(0,0,0xffffff,0);
+    /*
+    colorat(0,0,0xffffff,0);    
     print_int(cursor.mouse_x);    
     print(", ");
     print_int(cursor.mouse_y);
+    */
 }
 
 // Создать базовое окно

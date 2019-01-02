@@ -96,7 +96,7 @@ void push_event_click(int key, int dir) {
     for (i = 1; i < WINDOW_MAX; i++) {
 
         w = & allwin[i];
-        
+
         if (w->active) {
             active_last = i;
         }
@@ -117,21 +117,19 @@ void push_event_click(int key, int dir) {
 
         w = & allwin[ hwnd ];
 
-
         // Активация нового окна
         if (w->active == 0) {
-            
+
             window_activate(hwnd);
-            
-            // Перерисова предыдушего активного окна
-            if (active_last) {                
+
+            // Перерисова предыдущего активного окна
+            if (active_last) {
                 if (allwin[ active_last ].active == 0) {
                     window_repaint(active_last);
-                }                
+                }
             }
 
-            // -- отправить EVENT_REPAINT @todo отложенным методом
-            window_repaint(hwnd);            
+            window_repaint(hwnd);
             panel_repaint();
         }
 
