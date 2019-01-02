@@ -122,8 +122,8 @@ void push_event_click(int key, int dir) {
 
             window_activate(hwnd);
 
-            // Перерисова предыдущего активного окна
-            if (active_last) {
+            // Перерисовка предыдущего активного окна
+            if (active_last != hwnd) {
                 if (allwin[ active_last ].active == 0) {
                     window_repaint(active_last);
                 }
