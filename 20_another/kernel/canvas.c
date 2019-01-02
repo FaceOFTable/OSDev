@@ -116,8 +116,11 @@ void block(int x1, int y1, int x2, int y2, unsigned char color) {
         // Средний блок, один из краев принадлежит [my, my+20], либо оба находятся за границами
         if ( (my <= y1 && y1 < myh) || (my <= y2 && y2 < myh) || (y1 < my && y2 >= myh) ) {
 
+            int h1 = y1 > my  ? y1 : my;
+            int h2 = y2 < myh ? y2 : myh-1;
+
             // Рисовать саму мышь
-            for (i = my; i <= my + 20; i++)
+            for (i = h1; i <= h2; i++)
             for (j = x1; j <= x2; j++)
                 pset(j, i, color);
         }
