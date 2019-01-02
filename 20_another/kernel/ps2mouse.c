@@ -1,3 +1,12 @@
+
+#define PS2_BUTTON_LEFT         1
+#define PS2_BUTTON_RIGHT        2
+#define PS2_BUTTON_MIDDLE       4
+
+int     ps2_pressed;        // =1 Мышь нажата
+int     ps2_mouse_state;    // Текущие нажатые биты
+int     ps2_time_at;        // Когда именно нажата
+
 // ----------------------------------------------------
 // https://wiki.osdev.org/%228042%22_PS/2_Controller
 
@@ -64,9 +73,101 @@ void init_ps2_mouse() {
     kb_cmd(0xD4);
     kb_write(0xF4);
     kb_read();
+
+    // Инициализировать переменные
+    ps2_pressed = 0;
+    ps2_time_at = 0;
+    ps2_mouse_state = 0;
 }
 
-// Перехватчик мыши
+// Отослать события нажатия мыши
+// key = 1 | 2 | 4
+// dir = 1 (down) 0 (up)
+
+void push_event_click(int key, int dir) {
+
+    int i, hwnd = 0, hit = 0, active_last = 0;
+    int x = cursor.mouse_x;
+    int y = cursor.mouse_y;
+
+    struct window* w;
+
+    // Обнаружить, где именно нажата мышь
+    for (i = 1; i < WINDOW_MAX; i++) {
+
+        w = & allwin[i];
+        
+        if (w->active) {
+            active_last = i;
+        }
+
+        // Проверять все
+        if (w->in_use) {
+
+            // Проверка попадания в окно
+            if (w->x1 <= x && x <= w->x2 && w->y1 <= y && y <= w->y2) {
+                hwnd = i;
+                hit = 1;
+            }
+        }
+    }
+
+    // Отослать событие
+    if (hit) {
+
+        w = & allwin[ hwnd ];
+
+
+        // Активация нового окна
+        if (w->active == 0) {
+            
+            window_activate(hwnd);
+            
+            // Перерисова предыдушего активного окна
+            if (active_last) {                
+                if (allwin[ active_last ].active == 0) {
+                    window_repaint(active_last);
+                }                
+            }
+
+            // -- отправить EVENT_REPAINT @todo отложенным методом
+            window_repaint(hwnd);            
+            panel_repaint();
+        }
+
+        // Вызвать callback, если есть
+        if (dir) {
+            if (w->event_mousedown)
+                w->event_mousedown();
+        }
+        else {
+            if (w->event_mouseup)
+                w->event_mouseup();
+        }
+    }
+}
+
+// Тест на нажатие и отпускание мыши
+void ps2_edge_click(int cmd, int key) {
+
+    // Левая кнопка мыши
+    if (cmd & key) {
+
+        if ((ps2_mouse_state & key) == 0) {
+            push_event_click(key, 1);
+        }
+        ps2_mouse_state |= key;
+    }
+    else {
+
+        if (ps2_mouse_state & key) {
+            push_event_click(key, 0);
+        }
+        ps2_mouse_state &= ~key;
+    }
+}
+
+// Перехватчик событий мыши
 // https://wiki.osdev.org/PS/2_Mouse
 void pic_ps2mouse() {
 
@@ -83,7 +184,7 @@ void pic_ps2mouse() {
     int yn = cursor.mouse_y;
     int xo = xn, yo = yn;
 
-    // Прежняя позиция
+    // Знаковое расширение (x,y)
     if (cmd & 0x10) x = -((x ^ 0xFF) + 1);
     if (cmd & 0x20) y = -((y ^ 0xFF) + 1);
 
@@ -95,7 +196,15 @@ void pic_ps2mouse() {
     if (xn > 639) xn = 639;
     if (yn > 479) yn = 479;
 
-    mouse_xy(xn, yn); // Новая позиция мыши
+    // Новая позиция мыши
+    mouse_xy(xn, yn);
+
+    // Обнаружение событий нажатия и отпускания мыши
+    ps2_edge_click(cmd, PS2_BUTTON_LEFT);
+    ps2_edge_click(cmd, PS2_BUTTON_RIGHT);
+    ps2_edge_click(cmd, PS2_BUTTON_MIDDLE);
+
+    // @todo отследить изменения мыши
 
     update_region(xo, yo, xo + 12, yo + 21); // Старый регион затереть
     update_region(xn, yn, xn + 12, yn + 21); // Новый установить

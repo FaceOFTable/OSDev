@@ -27,8 +27,6 @@ void init_windows() {
 void window_init(int id, int x, int y, int w, int h, char* title) {
 
     struct window* win = & allwin[ id ];
-    
-    bzero((void*)win, sizeof(struct window));
 
     win->x1 = x;
     win->y1 = y;
@@ -39,6 +37,9 @@ void window_init(int id, int x, int y, int w, int h, char* title) {
     win->h = h;
     win->title = title;
     win->bgcolor = 7;
+
+    win->panel = 1;
+    win->state = WINDOW_STATE_DEFAULT;
 }
 
 // Создать окно в системе
@@ -50,6 +51,8 @@ int window_create(int x, int y, int w, int h, char* title) {
     for (id = 1; id < WINDOW_MAX; id++) {
 
         if (allwin[id].in_use == 0) {
+
+            bzero(& allwin[ id ], sizeof(struct window));
 
             allwin[id].in_use = 1;
             allwin[id].active = 0;
@@ -100,6 +103,9 @@ void button(int x1, int y1, int w, int h, int pressed) {
 void window_repaint(int id) {
 
     struct window* win = & allwin[ id ];
+    
+    if (win->state != WINDOW_STATE_DEFAULT) 
+        return;
 
     // Подложка
     block(win->x1+1, win->y1+1, win->x2-1, win->y2-1, 7);
@@ -135,56 +141,25 @@ void window_activate(int id) {
     }
 
     allwin[id].active = 1;
-
 }
 
-// Панель снизу перерисовать
-void panel_repaint() {
+// Назначить событие
+void window_event(int hwnd, int event_type, void (*event)()) {
 
-    int t = 454, id, num = 0;
+    struct window* win = & allwin[ hwnd ];
 
-    color(0, -1);
+    switch (event_type) {
 
-    block(0, t,   639, t,   0);
-    block(0, t+1, 639, t+1, 15);
-    block(0, t+2, 639, 479, 7);
+        case EVENT_KEYPRESS:    win->event_keypress = event;  break;
+        case EVENT_KEYUP:       win->event_keyup    = event;  break;
 
-    // Кнопка пуск
-    button(3, 458, 72, 19, 0);
+        case EVENT_MOUSEDOWN:   win->event_mousedown = event; break;
+        case EVENT_MOUSEUP:     win->event_mouseup  = event;  break;
+        case EVENT_MOUSEMOVE:   win->event_mousemove = event; break;
+        case EVENT_MOUSEOUT:    win->event_mouseout = event;  break;
+        case EVENT_MOUSEIN:     win->event_mousein  = event;  break;
 
-    // Лого
-    block(6, 461, 11, 466, 4); block(13, 461, 18, 466, 2);
-    block(6, 468, 11, 473, 1); block(13, 468, 18, 473, 6);
-    print_at(3 + 20, 459 + 1, "Запуск");
-
-    // Вертикальная полоса-разделитель
-    block(78, 458, 78, 477, 8);
-    block(79, 458, 79, 477, 15);
-
-    // Параметры вывода
-    color(0, -1);
-    cursor.max_chars = 13;
-
-    // Отрисовать текущие окна
-    for (id = 1; id < WINDOW_MAX; id++) {
-
-        if (allwin[id].in_use) {
-
-            int x = 83 + 127*num;
-            int y = 460;
-
-            // Нарисовать кнопку
-            button(x, 458, 125, 19, allwin[id].active);
-
-            // Написать текст (макс 13 символов)
-            int n = print_at(x + 4, y, allwin[id].title);
-
-            // Если превышение, то дорисовать ..
-            if (n == 0) print_at(x + 4 + 13*8, y, "..");
-
-            num++;
-        }
+        case EVENT_CLOSE:       win->event_close    = event;  break;
+        case EVENT_REPAINT:     win->event_repaint  = event;  break;
     }
-
-    cursor.max_chars = 0;
 }

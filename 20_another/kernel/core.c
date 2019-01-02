@@ -97,8 +97,8 @@ void init_gdt() {
     load_gdt(g);
 }
 
-// Очистка регионов памяти
-void init() {
+// Очистка регионов памяти. fsblock = 1 блокировать исполнение без fs
+void init(int fsblock) {
 
     int mask = IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE | IRQ_TIMER;
 
@@ -112,5 +112,9 @@ void init() {
     init_windows();         // Инициализация окон
     init_paging();          // Страничная адресация (в последнюю очередь)
 
-    fs_init(0);
+    // Проверка на наличие файловых систем
+    if (fat_found == 0 && fsblock) { 
+        colorat(8,8,0xffffff,0); print("Panic! FAT not found"); for(;;); 
+    }
+    fs_init(0);             // Установка основной fs
 }

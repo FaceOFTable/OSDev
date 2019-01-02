@@ -7,6 +7,8 @@
 #include "kernel/canvas.h"
 #include "kernel/string.h"
 
+#include "app/desktop.h"
+
 // Графика
 #include "kernel/vga.c"
 #include "kernel/canvas.c"
@@ -25,20 +27,23 @@
 #include "kernel/task.c"
 #include "kernel/core.c"
 
+// Некоторые "приложения"
+#include "app/desktop.c"
+#include "app/miner.c"
+
+/* Данная ОС работает только в Bochs, и не работает больше нигде пока */
 // ---------------------------------------------------------------------
 
 void main() {
 
-    /* Данная ОС работает только в Bochs, и не работает больше нигде пока что */
-    init(); if (fat_found == 0) { colorat(8,8,0xffffff,0); print("Panic! FAT not found"); for(;;); } 
-    cls(3); mouse_show(1);
+    init(0); 
     
-    struct File fp = fopen("c:/wall/main.bmp");
-    
-    // int win = window_create(0, 0, 640, 452, "Управление");
-    // window_activate(win); window_repaint(win);
+    cls(3); 
+    mouse_show(1);  
+      
+    make_desktop();
+    make_miner();
 
     panel_repaint();
-
     sti; for(;;);
 }

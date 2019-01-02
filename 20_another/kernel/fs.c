@@ -439,6 +439,7 @@ int fs_get_cluster(file_id) {
 }
 
 // Открыть новый дескриптор файла
+// struct File fp = fopen("c:/wall/main.bmp");    
 struct File fopen(const char* name) {
 
     struct File fp;

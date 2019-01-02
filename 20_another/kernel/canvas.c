@@ -95,8 +95,6 @@ void block_draw(int x1, int y1, int x2, int y2, unsigned char color) {
 // Нарисовать блок :: очищается I=0, чтобы не вызвать прерывание мыши
 void block(int x1, int y1, int x2, int y2, unsigned char color) {
 
-    cli;
-
     int i, j;
     int mx  = cursor.mouse_x,
         my  = cursor.mouse_y,
@@ -133,8 +131,6 @@ void block(int x1, int y1, int x2, int y2, unsigned char color) {
     else {
         block_draw(x1, y1, x2, y2, color);
     }
-
-    sti;
 }
 // ---------------------------------------------------------------------
 
