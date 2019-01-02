@@ -16,7 +16,7 @@ void color(int frcolor, int bgcolor) {
     cursor.bgcolor = bgcolor;
 }
 
-// Комбинированно
+// Положение курсора и цвет
 void colorat(int x, int y, int fr, int bg) {
 
     at(x, y);
@@ -28,7 +28,7 @@ unsigned char point(int x, int y) {
 
     int mx = cursor.mouse_x,
         my = cursor.mouse_y;
-        
+
     // Не выходить за границы экрана
     if (x < 0 || y < 0 || x > 639 || y > 479)
         return 0;
@@ -51,7 +51,7 @@ unsigned char point(int x, int y) {
 }
 
 // ---------------------------------------------------------------------
-// Нарисовать точку как на экране, так и в BB
+// Нарисовать точку как на экране, так и в backbuffer
 void pset(int x, int y, unsigned char color) {
 
     if (x >= 0 && y >= 0 && x < 640 && y < 480) {
@@ -228,8 +228,7 @@ int print(char* m) {
     return num;
 }
 
-/** Печать строки по по (X,Y)
- */
+// Печать строки по по (X,Y)
 int print_at(int x, int y, char* m) {
 
     cursor.x = x;

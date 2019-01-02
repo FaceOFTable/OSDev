@@ -26,6 +26,15 @@
 #define FS_TYPE_FAT16       0x06
 #define FS_TYPE_FAT32       0x0B
 
+// Атрибуты
+#define ATTR_LONG_NAME		0x0F
+#define ATTR_READ_ONLY		0x01
+#define ATTR_HIDDEN			0x02
+#define ATTR_SYSTEM			0x04
+#define ATTR_VOLUME_ID		0x08
+#define ATTR_DIRECTORY		0x10
+#define ATTR_ARCHIVE		0x20
+
 // Устройство ATA
 struct DEVICE {
 
@@ -151,10 +160,11 @@ struct FS_CURRENT {
 struct File {
 
     int       fs_id;                // Указатель fatfs[ fs_id ]
+    int       opened;               // Файл был открыт
     uint32_t  dir;                  // Указатель на директорию, откуда получен файл
     uint32_t  cluster_first;        // Стартовый кластер
     uint32_t  cluster_current;      // Текущий кластер
-    uint32_t  seek;                 // Позиция курсора в файле
+    uint32_t  seek;                 // Позиция курсора относительн кластера
     struct FAT_ITEM file;           // Информация о файле
 };
 

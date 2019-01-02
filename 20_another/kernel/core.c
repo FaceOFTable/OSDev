@@ -111,38 +111,6 @@ void init() {
     init_vga();             // Подготовить VGA палитру
     init_windows();         // Инициализация окон
     init_paging();          // Страничная адресация (в последнюю очередь)
-}
 
-// Конвертация числа в ASCIIZ
-int i2a(int num, char* res) {
-
-    char fm[24];
-
-    int i, j = 0, k = 0, neg = 0, dignum = 0;
-
-    // Пропечатка отрицательного числа
-    if (num < 0) {
-        num = -num;
-        dignum++;
-        neg = 1;
-    }
-
-    // Ищем данные
-    for (i = 0; i < 10; i++) {
-
-        dignum++;
-        fm[j++] = ('0' + num % 10);
-        num = num / 10;
-
-        if (num == 0)
-            break;
-    }
-
-    // Отрицательный знак
-    if (neg) res[k++] = '-';
-
-    // Переписываем в обратную сторону
-    for (j--; j >= 0; j--) res[k++] = fm[j]; res[k] = 0;
-
-    return dignum;
+    fs_init(0);
 }

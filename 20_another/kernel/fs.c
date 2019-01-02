@@ -326,11 +326,11 @@ void fs_rewind() {
 // по номеру FS: fs_id = [0..15]
 void fs_init(int fs_id) {
 
-    fs.fs_id        = fs_id; // Для запросов на девайс
-    fs.dir_root     = fatfs[ fs_id ].root_cluster;   // Установка корневого
+    fs.fs_id        = fs_id;    // Для запросов на девайс
+    fs.dir_root     = fatfs[ fs_id ].root_cluster; // Установка корневого
     fs.dir          = fs.dir_root;      // Текущий каталог = корневой
-    fs.cur_cluster  = 0;    // Текущий кластер = 0, чтобы потом перезагрузился
-    fs_rewind();            // Перемотать на первый кластер, сектор и файл
+    fs.cur_cluster  = 0;        // Текущий кластер = 0, чтобы потом перезагрузился
+    fs_rewind();                // Перемотать на первый кластер, сектор и файл
 }
 
 // Переход к следующему элементу
@@ -347,7 +347,6 @@ int fs_next() {
 
         // Это был последний кластер, продолжения нет
         if (nc >= 0x0FFFFFF0) {
-
             return 0;
 
         } else {
@@ -415,7 +414,7 @@ int fs_find(char* name) {
 
     do {
 
-        struct FAT_ITEM * item = & fs.items[ fs.cur_item ];
+        struct FAT_ITEM* item = & fs.items[ fs.cur_item ];
 
         // Ничего не найдено
         if (item->name[0] == 0) {
@@ -432,8 +431,81 @@ int fs_find(char* name) {
     return 0;
 }
 
-// fopen()
-// fseek()
-// ftell()
-// fread() | fwrite()
-// fclose()
+// Получение кластера из FATITEM, file_id=0..n
+int fs_get_cluster(file_id) {
+
+    return (fs.items[ file_id ].fstclushi<<16) +
+            fs.items[ file_id ].fstcluslo;
+}
+
+// Открыть новый дескриптор файла
+struct File fopen(const char* name) {
+
+    struct File fp;
+
+    char fn[256];
+    int cursor = 0, cs = 0, file_id;
+
+    // Инициализация
+    bzero(&fp, sizeof(fp));
+
+    // Запись указателя на корень
+    fp.dir = fs.dir;
+
+    trim(name, fn);
+    strtoupper(fn);
+
+    // Есть выбор номера диска
+    if (strcmp(fn + 1, ":/") >= 0) {
+
+        fp.fs_id = fn[0] - 'C';
+        fs_init(fp.fs_id);
+        cursor += 3;
+    }
+
+    // Искать либо "/", либо 0
+    cs = cursor; while (fn[cursor]) {
+
+        if (fn[cursor] == '/') {
+            fn[cursor] = 0;
+
+            // Файл или каталог был найден
+            if ((file_id = fs_find(fn + cs))) {
+
+                file_id--;
+
+                // Если это директория, перемотать ее
+                if (fs.items[file_id].attr & ATTR_DIRECTORY) {
+
+                    fs.dir = fs_get_cluster(file_id);
+                    fp.dir = fs.dir;
+                    fs_rewind();
+                }
+            }
+            // Если каталог не найден, это ошибка
+            else {
+
+                fp.opened = 0;
+                return fp;
+            }
+
+            cs = cursor + 1;
+        }
+
+        cursor++;
+    }
+
+    // Найти файл и переписать его атрибуты
+    if ((file_id = fs_find(fn + cs))) {
+        
+        file_id--;
+        
+        fp.cluster_first    = fs_get_cluster(file_id);
+        fp.cluster_current  = fp.cluster_first;
+        fp.file     = fs.items[ file_id ];        
+        fp.opened   = 1;
+        fp.seek     = 0;
+    }
+
+    return fp;
+}
