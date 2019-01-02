@@ -69,36 +69,36 @@ void init_ps2_mouse() {
 // Перехватчик мыши
 // https://wiki.osdev.org/PS/2_Mouse
 void pic_ps2mouse() {
-    
+
     int x, y, cmd;
-    
-    kb_cmd(0xAD);
-        
-    cmd = kb_read();
+
+    kb_cmd(0xAD);       // Команда и блокировка клавиатуры
+    cmd = kb_read();    // Конфигурация
     x   = kb_read();
     y   = kb_read();
-    
+
     // @todo overflow x,y
-        
+
     int xn = cursor.mouse_x;
-    int yn = cursor.mouse_y;    
+    int yn = cursor.mouse_y;
     int xo = xn, yo = yn;
-    
+
     // Прежняя позиция
     if (cmd & 0x10) x = -((x ^ 0xFF) + 1);
     if (cmd & 0x20) y = -((y ^ 0xFF) + 1);
-     
+
     xn += x;
     yn -= y;
-    
+
     if (xn < 0)   xn = 0;
     if (yn < 0)   yn = 0;
     if (xn > 639) xn = 639;
     if (yn > 479) yn = 479;
 
-    mouse_xy(xn, yn);
+    mouse_xy(xn, yn); // Новая позиция мыши
+
     update_region(xo, yo, xo + 12, yo + 21); // Старый регион затереть
     update_region(xn, yn, xn + 12, yn + 21); // Новый установить
-    
-    kb_cmd(0xAE);
+
+    kb_cmd(0xAE); // Разблокировка клавиатуры
 }

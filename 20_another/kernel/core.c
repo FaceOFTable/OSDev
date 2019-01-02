@@ -100,7 +100,7 @@ void init_gdt() {
 // Очистка регионов памяти
 void init() {
 
-    int mask = IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE; // | IRQ_TIMER
+    int mask = IRQ_KEYB | IRQ_CASCADE | IRQ_PS2MOUSE | IRQ_TIMER;
 
     init_irq(mask);         // Назначить обработчики IRQ
     init_ps2_mouse();       // Инициализировать мышь

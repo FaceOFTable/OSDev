@@ -1,13 +1,15 @@
 [BITS 32]
 
 [EXTERN main]
-[EXTERN pic_keyboard]
-[EXTERN pic_ps2mouse]
+[EXTERN pic_timer]          ; IRQ 0
+[EXTERN pic_keyboard]       ; IRQ 1
+[EXTERN pic_ps2mouse]       ; IRQ C
 
 [GLOBAL _start]
 
 [GLOBAL apic_disable]
 [GLOBAL INT_null]
+[GLOBAL IRQ_timer]
 [GLOBAL IRQ_keyboard]
 [GLOBAL IRQ_ps2mouse]
 [GLOBAL IRQ_cascade]
@@ -69,6 +71,15 @@ IRQ_slave:
 
 ; Обработчик клавиатуры
 ; ----------------------------------------------------------------------
+
+IRQ_timer:
+
+        pushad
+        call    pic_timer
+        mov     al, 20h
+        out     20h, al
+        popad
+        iretd
 
 IRQ_keyboard:
 

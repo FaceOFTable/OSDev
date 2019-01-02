@@ -13,6 +13,7 @@
 #include "kernel/gui.c"
 
 // Устройства
+#include "kernel/timer.c"
 #include "kernel/keyboard.c"
 #include "kernel/ps2mouse.c"
 
@@ -33,13 +34,9 @@ void main() {
     cls(3); mouse_show(1);
     
     struct File fp = fopen("c:/wall/main.bmp");
-
-    /* fs_init(0); int m = fs_find("coreboot.bin"); */
-
+    
     // int win = window_create(0, 0, 640, 452, "Управление");
     // window_activate(win); window_repaint(win);
-
-    palloc(4096);
 
     panel_repaint();
 

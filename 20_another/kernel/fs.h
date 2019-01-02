@@ -164,7 +164,9 @@ struct File {
     uint32_t  dir;                  // Указатель на директорию, откуда получен файл
     uint32_t  cluster_first;        // Стартовый кластер
     uint32_t  cluster_current;      // Текущий кластер
-    uint32_t  seek;                 // Позиция курсора относительн кластера
+    uint32_t  seek;                 // Позиция курсора в файле
+    uint32_t  seek_cl;              // Позиция курсора относительно кластера
+    uint32_t  filesize;             // Размер файла
     struct FAT_ITEM file;           // Информация о файле
 };
 

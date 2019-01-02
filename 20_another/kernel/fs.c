@@ -502,9 +502,11 @@ struct File fopen(const char* name) {
         
         fp.cluster_first    = fs_get_cluster(file_id);
         fp.cluster_current  = fp.cluster_first;
-        fp.file     = fs.items[ file_id ];        
+        fp.file     = fs.items[ file_id ];
+        fp.filesize = fp.file.filesize;
         fp.opened   = 1;
         fp.seek     = 0;
+        fp.seek_cl  = 0;
     }
 
     return fp;

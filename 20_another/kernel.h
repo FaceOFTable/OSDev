@@ -6,6 +6,7 @@
 // ---------------------------------------------------------------------
 void apic_disable();            // Отключить LAPIC
 void INT_null();                // Заглушка INT
+void IRQ_timer();
 void IRQ_keyboard();
 void IRQ_ps2mouse();
 void IRQ_cascade();
@@ -46,7 +47,6 @@ struct __attribute__((__packed__)) IDT_Item {
 
 // Описание полей дескриптора
 #define DESC_PRESENT     0x80
-
 #define TYPE_TSS_AVAIL   0x09
 
 // Указатель на GDT

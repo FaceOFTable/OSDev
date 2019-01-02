@@ -27,6 +27,8 @@ void init_windows() {
 void window_init(int id, int x, int y, int w, int h, char* title) {
 
     struct window* win = & allwin[ id ];
+    
+    bzero((void*)win, sizeof(struct window));
 
     win->x1 = x;
     win->y1 = y;
