@@ -99,19 +99,26 @@ void draw_mover() {
     mover_height = w->y2 - w->y1;
 
     for (i = 0; i <= mover_width; i++) {
+        
         bgmover[0][i] = get_point(w->x1 + i, w->y1);
-        bgmover[1][i] = get_point(w->x1 + i, w->y2);
+        bgmover[1][i] = get_point(w->x1 + i, w->y2);        
     }
 
     for (i = 0; i <= mover_height; i++) {
+        
         bgmover[2][i] = get_point(w->x1, w->y1 + i);
         bgmover[3][i] = get_point(w->x2, w->y1 + i);
     }
+    
+    for (i = 0; i <= mover_width; i += 2) {
+        pset(w->x1 + i, w->y1, 15);
+        pset(w->x1 + i, w->y2, 15);
+    }
+    for (i = 0; i <= mover_height; i += 2) {
+        pset(w->x1, w->y1 + i, 15);
+        pset(w->x2, w->y1 + i, 15);
+    }
 
-    block(w->x1, w->y1, w->x2, w->y1, 15);
-    block(w->x1, w->y1, w->x1, w->y2, 15);
-    block(w->x1, w->y2, w->x2, w->y2, 15);
-    block(w->x2, w->y1, w->x2, w->y2, 15);
 }
 
 // Восстановить область
@@ -214,7 +221,7 @@ void push_event_click(int key, int dir) {
     }
 
     // Если мышь отпущена, то при активированном "перетаскивателе", восстановить фон
-    if (key == PS2_BUTTON_LEFT && dir == 0) {
+    if (key == PS2_BUTTON_LEFT && dir == 0 && mover_active) {
 
         restore_mover();
 
