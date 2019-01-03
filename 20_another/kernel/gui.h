@@ -1,9 +1,9 @@
 #define WINDOW_MAX  64      // Максимум окон
 
 // Режимы window.state
-#define WINDOW_STATE_NONE       0
-#define WINDOW_STATE_COLLAPSE   1
-#define WINDOW_STATE_DEFAULT    2
+#define WINDOW_STATE_NONE       0       // Нет окна
+#define WINDOW_STATE_COLLAPSE   1       // Есть, но скрыто
+#define WINDOW_STATE_DEFAULT    2       // Окно показано
 
 // Идентификаторы событий в окне
 #define EVENT_KEYPRESS      1

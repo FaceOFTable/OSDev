@@ -142,8 +142,8 @@ void push_event_click(int key, int dir) {
                 panel_repaint();
             }
 
-            // Нажат заголовок окна (LKM)
-            if (y >= w->y1 && y <= w->y1 + 22) {
+            // Нажат заголовок окна (LKM) -- если оно есть
+            if (y >= w->y1 && y <= w->y1 + 22 && w->state == WINDOW_STATE_DEFAULT) {
                 hit_title = 1;
             }
         }
