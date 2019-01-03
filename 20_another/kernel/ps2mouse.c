@@ -87,56 +87,6 @@ void init_ps2_mouse() {
     mover_active = 0;
 }
 
-// Нарисовать окно
-void draw_mover() {
-
-    int i;
-    struct window* w = & allwin[ mover_active ];
-
-    mover_x1     = w->x1;
-    mover_y1     = w->y1;
-    mover_width  = w->x2 - w->x1;
-    mover_height = w->y2 - w->y1;
-
-    for (i = 0; i <= mover_width; i++) {
-        
-        bgmover[0][i] = get_point(w->x1 + i, w->y1);
-        bgmover[1][i] = get_point(w->x1 + i, w->y2);        
-    }
-
-    for (i = 0; i <= mover_height; i++) {
-        
-        bgmover[2][i] = get_point(w->x1, w->y1 + i);
-        bgmover[3][i] = get_point(w->x2, w->y1 + i);
-    }
-    
-    for (i = 0; i <= mover_width; i += 2) {
-        pset(w->x1 + i, w->y1, 15);
-        pset(w->x1 + i, w->y2, 15);
-    }
-    for (i = 0; i <= mover_height; i += 2) {
-        pset(w->x1, w->y1 + i, 15);
-        pset(w->x2, w->y1 + i, 15);
-    }
-
-}
-
-// Восстановить область
-void restore_mover() {
-
-    int i;
-
-    for (i = 0; i <= mover_width; i++) {
-        pset(mover_x1 + i, mover_y1, bgmover[0][i]);
-        pset(mover_x1 + i, mover_y1 + mover_height, bgmover[1][i]);
-    }
-
-    for (i = 0; i <= mover_height; i++) {
-        pset(mover_x1, mover_y1 + i, bgmover[2][i]);
-        pset(mover_x1 + mover_width, mover_y1 + i, bgmover[3][i]);
-    }
-}
-
 // Отослать события нажатия мыши
 // key = 1 | 2 | 4
 // dir = 1 (down) 0 (up)
@@ -288,7 +238,7 @@ void pic_ps2mouse() {
     // Есть перемещение
     if (x || y) {
 
-        // @todo найти области
+        // @todo найти области, куда попала мышь при перемещении и отослать event
 
         if (mover_active) {
 
@@ -310,8 +260,6 @@ void pic_ps2mouse() {
     ps2_edge_click(cmd, PS2_BUTTON_LEFT);
     ps2_edge_click(cmd, PS2_BUTTON_RIGHT);
     ps2_edge_click(cmd, PS2_BUTTON_MIDDLE);
-
-    // @todo отследить изменения мыши
 
     update_region(xo, yo, xo + 12, yo + 21); // Старый регион затереть
     update_region(xn, yn, xn + 12, yn + 21); // Новый установить

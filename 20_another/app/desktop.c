@@ -94,6 +94,57 @@ void desktop_repaint_bg(int x1, int y1, int w, int h) {
         panel_repaint();    
 }
 
+// Нарисовать линии перемещения
+void draw_mover() {
+
+    int i;
+    struct window* w = & allwin[ mover_active ];
+
+    // Обновить новую позицию
+    mover_x1     = w->x1;
+    mover_y1     = w->y1;
+    mover_width  = w->x2 - w->x1;
+    mover_height = w->y2 - w->y1;
+
+    for (i = 0; i <= mover_width; i++) {
+        
+        bgmover[0][i] = get_point(w->x1 + i, w->y1);
+        bgmover[1][i] = get_point(w->x1 + i, w->y2);        
+    }
+
+    for (i = 0; i <= mover_height; i++) {
+        
+        bgmover[2][i] = get_point(w->x1, w->y1 + i);
+        bgmover[3][i] = get_point(w->x2, w->y1 + i);
+    }
+    
+    for (i = 0; i <= mover_width; i += 2) {
+        pset(w->x1 + i, w->y1, 15);
+        pset(w->x1 + i, w->y2, 15);
+    }
+    for (i = 0; i <= mover_height; i += 2) {
+        pset(w->x1, w->y1 + i, 15);
+        pset(w->x2, w->y1 + i, 15);
+    }
+}
+
+// Восстановить область
+void restore_mover() {
+
+    int i;
+
+    for (i = 0; i <= mover_width; i++) {
+        pset(mover_x1 + i, mover_y1, bgmover[0][i]);
+        pset(mover_x1 + i, mover_y1 + mover_height, bgmover[1][i]);
+    }
+
+    for (i = 0; i <= mover_height; i++) {
+        pset(mover_x1, mover_y1 + i, bgmover[2][i]);
+        pset(mover_x1 + mover_width, mover_y1 + i, bgmover[3][i]);
+    }
+}
+
+
 // Создать базовое окно
 void make_desktop() {
     
