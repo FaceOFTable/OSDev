@@ -45,5 +45,4 @@ struct window {
 // Зарегистрированные в системе окна
 struct window allwin[ WINDOW_MAX ];
 
-int     window_count;       // Количество окон
-int     desktop_hwnd;       // Главное окно
+int  window_count; // Количество окон

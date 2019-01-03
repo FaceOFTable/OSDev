@@ -3,6 +3,12 @@
 #define PS2_BUTTON_RIGHT        2
 #define PS2_BUTTON_MIDDLE       4
 
+// Фон за перемещателем
+char    bgmover[4][640];
+int     mover_x1, mover_y1, 
+        mover_init_x1, mover_init_y1, // x,y при первом клике
+        mover_width, mover_height, mover_active;
+
 int     ps2_pressed;        // =1 Мышь нажата
 int     ps2_mouse_state;    // Текущие нажатые биты
 int     ps2_time_at;        // Когда именно нажата
@@ -78,6 +84,50 @@ void init_ps2_mouse() {
     ps2_pressed = 0;
     ps2_time_at = 0;
     ps2_mouse_state = 0;
+    mover_active = 0;
+}
+
+// Нарисовать окно
+void draw_mover() {
+
+    int i;
+    struct window* w = & allwin[ mover_active ];
+
+    mover_x1     = w->x1;
+    mover_y1     = w->y1;
+    mover_width  = w->x2 - w->x1;
+    mover_height = w->y2 - w->y1;
+
+    for (i = 0; i <= mover_width; i++) {
+        bgmover[0][i] = get_point(w->x1 + i, w->y1);
+        bgmover[1][i] = get_point(w->x1 + i, w->y2);
+    }
+
+    for (i = 0; i <= mover_height; i++) {
+        bgmover[2][i] = get_point(w->x1, w->y1 + i);
+        bgmover[3][i] = get_point(w->x2, w->y1 + i);
+    }
+
+    block(w->x1, w->y1, w->x2, w->y1, 15);
+    block(w->x1, w->y1, w->x1, w->y2, 15);
+    block(w->x1, w->y2, w->x2, w->y2, 15);
+    block(w->x2, w->y1, w->x2, w->y2, 15);
+}
+
+// Восстановить область
+void restore_mover() {
+
+    int i;
+
+    for (i = 0; i <= mover_width; i++) {
+        pset(mover_x1 + i, mover_y1, bgmover[0][i]);
+        pset(mover_x1 + i, mover_y1 + mover_height, bgmover[1][i]);
+    }
+
+    for (i = 0; i <= mover_height; i++) {
+        pset(mover_x1, mover_y1 + i, bgmover[2][i]);
+        pset(mover_x1 + mover_width, mover_y1 + i, bgmover[3][i]);
+    }
 }
 
 // Отослать события нажатия мыши
@@ -86,7 +136,7 @@ void init_ps2_mouse() {
 
 void push_event_click(int key, int dir) {
 
-    int i, hwnd = 0, hit = 0, active_last = 0;
+    int i, hwnd = 0, hit = 0, hit_title = 0, active_last = 0;
     int x = cursor.mouse_x;
     int y = cursor.mouse_y;
 
@@ -117,20 +167,28 @@ void push_event_click(int key, int dir) {
 
         w = & allwin[ hwnd ];
 
-        // Активация нового окна
-        if (w->active == 0) {
+        if (key == PS2_BUTTON_LEFT) {
 
-            window_activate(hwnd);
+            // Активация нового окна при левом кнопке мыши
+            if (w->active == 0) {
 
-            // Перерисовка предыдущего активного окна
-            if (active_last != hwnd) {
-                if (allwin[ active_last ].active == 0) {
-                    window_repaint(active_last);
+                window_activate(hwnd);
+
+                // Перерисовка предыдущего активного окна
+                if (active_last != hwnd) {
+                    if (allwin[ active_last ].active == 0) {
+                        window_repaint(active_last);
+                    }
                 }
+
+                window_repaint(hwnd);
+                panel_repaint();
             }
 
-            window_repaint(hwnd);
-            panel_repaint();
+            // Нажат заголовок окна (LKM)
+            if (y >= w->y1 && y <= w->y1 + 22) {
+                hit_title = 1;
+            }
         }
 
         // Вызвать callback, если есть
@@ -142,6 +200,31 @@ void push_event_click(int key, int dir) {
             if (w->event_mouseup)
                 w->event_mouseup();
         }
+
+        // Захват и перерисовка moverbox
+        if (hit_title && dir) {
+
+            mover_active = hwnd;
+
+            mover_init_x1 = w->x1;
+            mover_init_y1 = w->y1;
+
+            draw_mover();
+        }
+    }
+
+    // Если мышь отпущена, то при активированном "перетаскивателе", восстановить фон
+    if (key == PS2_BUTTON_LEFT && dir == 0) {
+
+        restore_mover();
+
+        // Перерисовать старую область
+        desktop_repaint_bg(mover_init_x1, mover_init_y1, mover_width, mover_height);
+
+        // перерисовать окно
+        window_repaint(mover_active);
+
+        mover_active = 0;
     }
 }
 
@@ -170,6 +253,7 @@ void ps2_edge_click(int cmd, int key) {
 void pic_ps2mouse() {
 
     int x, y, cmd;
+    struct window* w;
 
     kb_cmd(0xAD);       // Команда и блокировка клавиатуры
     cmd = kb_read();    // Конфигурация
@@ -193,6 +277,24 @@ void pic_ps2mouse() {
     if (yn < 0)   yn = 0;
     if (xn > 639) xn = 639;
     if (yn > 479) yn = 479;
+
+    // Есть перемещение
+    if (x || y) {
+
+        // @todo найти области
+
+        if (mover_active) {
+
+            restore_mover();
+
+            w = & allwin[ mover_active ];
+
+            w->x1 += x; w->x2 += x;
+            w->y1 -= y; w->y2 -= y;
+
+            draw_mover();
+        }
+    }
 
     // Новая позиция мыши
     mouse_xy(xn, yn);

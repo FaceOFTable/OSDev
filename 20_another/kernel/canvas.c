@@ -23,6 +23,15 @@ void colorat(int x, int y, int fr, int bg) {
     color(fr, bg);
 }
 
+// Получение точки из backbuffer
+unsigned char get_point(int x, int y) {
+    
+    if (x < 0 || y < 0 || x > 639 || y > 479)
+        return 0;
+        
+    return canvas[y*640 + x];
+}
+
 // Проверка на наличие МЫШИ в данной точке
 unsigned char point(int x, int y) {
 
@@ -136,26 +145,6 @@ void block(int x1, int y1, int x2, int y2, unsigned char color) {
     }
 }
 // ---------------------------------------------------------------------
-
-// Очистка экрана
-void cls(unsigned char color) {
-
-    int i;
-
-    // Заполнить цветом
-    block(0, 0, 639, 479, color);
-
-    // Инициализация курсора
-    cursor.x = 0;
-    cursor.y = 0;
-    cursor.frcolor       = 0;
-    cursor.bgcolor       = -1;
-    cursor.border_top    = 0;
-    cursor.border_right  = 639;
-    cursor.border_bottom = 479;
-    cursor.border_left   = 0;
-    cursor.max_chars     = 0;
-}
 
 /** Печать символа на экране в режиме телетайпа
  * @param x, y позиция в пикселях
