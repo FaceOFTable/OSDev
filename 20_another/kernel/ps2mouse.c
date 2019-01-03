@@ -5,7 +5,7 @@
 
 // Фон за перемещателем
 char    bgmover[4][640];
-int     mover_x1, mover_y1, 
+int     mover_x1, mover_y1,
         mover_init_x1, mover_init_y1, // x,y при первом клике
         mover_width, mover_height, mover_active;
 

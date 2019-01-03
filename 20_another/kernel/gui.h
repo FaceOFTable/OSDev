@@ -15,6 +15,7 @@
 #define EVENT_MOUSEIN       7
 #define EVENT_CLOSE         8
 #define EVENT_REPAINT       9
+#define EVENT_TIMER         10
 
 struct window {
 
@@ -40,6 +41,7 @@ struct window {
     void    (*event_mousein)();
     void    (*event_close)();
     void    (*event_repaint)();
+    void    (*event_timer)();
 };
 
 // Зарегистрированные в системе окна

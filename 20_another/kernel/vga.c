@@ -142,6 +142,7 @@ void init_vga() {
     // Режим 2 (регистр выбор режима 5)
     // -- режим записи 1 слой цвета - 1 бит
     for (i = 0; i < 16; i++) {
+        
         IoWrite8(VGA_DAC_WRITE_INDEX, i);
         IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 0] >> 2);
         IoWrite8(VGA_DAC_DATA, vga_palette_16[i*3 + 1] >> 2);

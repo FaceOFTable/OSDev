@@ -16,21 +16,20 @@ void cls(unsigned char color) {
     cursor.border_bottom = 479;
     cursor.border_left   = 0;
     cursor.max_chars     = 0;
-    
+
     desktop_color = color;
 }
 
 // На рабочий стол было нажатие
 void desktop_mousedown() {
-    
+
     /*
-    colorat(0,0,0xffffff,0);    
-    print_int(cursor.mouse_x);    
+    colorat(0,0,0xffffff,0);
+    print_int(cursor.mouse_x);
     print(", ");
     print_int(cursor.mouse_y);
     */
 }
-
 
 // Панель снизу
 void panel_repaint() {
@@ -86,12 +85,12 @@ void panel_repaint() {
 
 // Перерисовать область заднего фона
 void desktop_repaint_bg(int x1, int y1, int w, int h) {
-    
+
     block(x1, y1, x1 + w, y1 + h, 3);
-    
+
     // Если область захватила панель
     if (y1 + h >= 450 || y1 >= 450)
-        panel_repaint();    
+        panel_repaint();
 }
 
 // Нарисовать линии перемещения
@@ -107,17 +106,17 @@ void draw_mover() {
     mover_height = w->y2 - w->y1;
 
     for (i = 0; i <= mover_width; i++) {
-        
+
         bgmover[0][i] = get_point(w->x1 + i, w->y1);
-        bgmover[1][i] = get_point(w->x1 + i, w->y2);        
+        bgmover[1][i] = get_point(w->x1 + i, w->y2);
     }
 
     for (i = 0; i <= mover_height; i++) {
-        
+
         bgmover[2][i] = get_point(w->x1, w->y1 + i);
         bgmover[3][i] = get_point(w->x2, w->y1 + i);
     }
-    
+
     for (i = 0; i <= mover_width; i += 2) {
         pset(w->x1 + i, w->y1, 15);
         pset(w->x1 + i, w->y2, 15);
@@ -144,12 +143,11 @@ void restore_mover() {
     }
 }
 
-
 // Создать базовое окно
 void make_desktop() {
-    
+
     desktop = window_create(0, 0, 640, 480, "Desktop");
-    
+
     allwin[ desktop ].panel = 0;
     allwin[ desktop ].state = 0;
 

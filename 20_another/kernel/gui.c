@@ -168,5 +168,6 @@ void window_event(int hwnd, int event_type, void (*event)()) {
 
         case EVENT_CLOSE:       win->event_close    = event;  break;
         case EVENT_REPAINT:     win->event_repaint  = event;  break;
+        case EVENT_TIMER:       win->event_timer    = event;  break;
     }
 }
